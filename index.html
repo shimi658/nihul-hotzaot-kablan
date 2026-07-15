@@ -1,9 +1,12 @@
+Exit code: 0
+Wall time: 0.6 seconds
+Output:
 <!doctype html>
 <html lang="he" dir="rtl">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#173f46" />
+    <meta name="theme-color" content="#f7f9fc" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -12,7 +15,7 @@
     <link rel="apple-touch-icon" href="app-icon.svg" />
     <title>ניהול הוצאות קבלן</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=2026070610" />
+    <link rel="stylesheet" href="styles.css?v=2026071524" />
   </head>
   <body>
     <section class="install-prompt" id="installPrompt" hidden role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
@@ -219,6 +222,17 @@
         </section>
 
         <section class="view" id="settingsView">
+          <section class="panel account-panel">
+            <div class="account-copy">
+              <span class="account-icon" aria-hidden="true">👤</span>
+              <div>
+                <p class="section-kicker">החשבון שלי</p>
+                <h2>חיבור וכניסה</h2>
+                <p class="hint account-hint">כאן אפשר לראות מי מחובר או לצאת מהמערכת.</p>
+              </div>
+            </div>
+            <div class="account-actions" id="accountActions"></div>
+          </section>
           <section class="panel">
             <div class="section-title">
               <div>
@@ -258,6 +272,7 @@
       <div class="empty-state">אין עדיין נתונים להצגה</div>
     </template>
 
-    <script src="app.js?v=2026070610"></script>
+    <script src="app.js?v=2026071524"></script>
   </body>
 </html>
+
