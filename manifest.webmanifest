@@ -1,0 +1,22 @@
+{
+  "name": "ניהול הוצאות קבלן",
+  "short_name": "הוצאות קבלן",
+  "description": "ניהול הוצאות, פרויקטים ודוחות לקבלן",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f6f2ea",
+  "theme_color": "#173f46",
+  "dir": "rtl",
+  "lang": "he",
+  "icons": [
+    {
+      "src": "app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
