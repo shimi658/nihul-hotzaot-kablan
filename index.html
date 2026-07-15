@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#173f46" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="הוצאות קבלן" />
+    <link rel="icon" href="app-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="app-icon.svg" />
+    <title>ניהול הוצאות קבלן</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css?v=2026070610" />
+  </head>
+  <body>
+    <section class="install-prompt" id="installPrompt" hidden role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
+      <div class="install-prompt-card">
+        <img src="app-icon.svg" alt="" width="64" height="64" />
+        <div>
+          <h2 id="installPromptTitle">להתקין את האתר כאפליקציה?</h2>
+          <p id="installPromptText">כך אפשר לפתוח את ניהול ההוצאות ישירות ממסך הבית.</p>
+        </div>
+        <button class="primary" id="confirmInstallBtn" type="button">כן, להתקין</button>
+        <button class="secondary" id="dismissInstallBtn" type="button">לא עכשיו</button>
+      </div>
+    </section>
+    <section class="auth-view" id="authView">
+      <div class="auth-card">
+        <p class="eyebrow">כניסה מאובטחת</p>
+        <h1>ניהול הוצאות קבלן</h1>
+        <p class="hero-copy">הכנס מייל, קבל קוד חד־פעמי, וכל ההוצאות שלך יישמרו ויסתנכרנו בין מכשירים.</p>
+
+        <form id="loginForm" class="auth-form">
+          <label>
+            מייל
+            <input id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" required />
+          </label>
+          <button class="primary full" type="submit">שלח קוד כניסה</button>
+        </form>
+
+        <form id="verifyForm" class="auth-form" hidden>
+          <p class="hint">שלחנו קוד אל <strong id="authEmailLabel"></strong></p>
+          <label>
+            קוד כניסה
+            <input id="loginCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="6 ספרות" required />
+          </label>
+          <button class="primary full" type="submit">כניסה</button>
+          <button class="secondary full" id="authBackBtn" type="button">החלף מייל</button>
+        </form>
+      </div>
+    </section>
+    <div class="app-shell">
+      <header class="hero-card">
+        <div class="hero-content">
+          <p class="eyebrow">ניהול הוצאות קבלן</p>
+          <h1>יומן הוצאות לפרויקטים</h1>
+          <p class="hero-copy">רישום מהיר מהטלפון, בלי טפסים כבדים ובלי בלגן.</p>
+        </div>
+        <div class="user-actions">
+          <span class="user-email" id="userEmailBadge" hidden></span>
+          <button class="secondary logout-button" id="logoutBtn" hidden type="button">יציאה</button>
+          <button class="install-button" id="installBtn" hidden type="button" aria-label="התקנה במסך הבית">
+            <span aria-hidden="true">+</span>
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="view active" id="expenseView">
+          <section class="home-grid" aria-label="סיכום מהיר">
+            <article class="home-card home-card-main">
+              <span>היום</span>
+              <strong id="homeTodayTotal">₪0</strong>
+              <small id="homeTodayCount">0 הוצאות</small>
+            </article>
+            <article class="home-card">
+              <span>החודש</span>
+              <strong id="homeMonthTotal">₪0</strong>
+              <small>סיכום שוטף</small>
+            </article>
+            <article class="home-card">
+              <span>פרויקטים</span>
+              <strong id="homeActiveProjects">0</strong>
+              <small>פעילים</small>
+            </article>
+          </section>
+
+          <section class="panel entry-panel">
+            <div class="section-title">
+              <div>
+                <p class="section-kicker">פעולה מהירה</p>
+                <h2>הוצאה חדשה</h2>
+              </div>
+              <span id="currentDateLabel" class="date-pill"></span>
+            </div>
+
+            <div class="agent-box">
+              <label class="full">
+                כתיבה חופשית
+                <textarea id="agentText" rows="3" placeholder="לדוגמה: קניתי מלט ב-450 שקל בטמבור לפרויקט וילה כהן"></textarea>
+              </label>
+              <button class="secondary full" id="agentBtn" type="button">מלא לי את הטופס</button>
+            </div>
+
+            <form id="expenseForm" class="form-grid">
+              <label>
+                פרויקט
+                <select id="expenseProject" required></select>
+              </label>
+
+              <label>
+                סכום
+                <input id="expenseAmount" inputmode="decimal" min="0" step="0.01" type="number" placeholder="0" required />
+              </label>
+
+              <label class="full">
+                מה נקנה
+                <input id="expenseItem" type="text" placeholder="לדוגמה: מלט, ברגים, הובלה" required />
+              </label>
+
+              <label>
+                חנות / ספק
+                <input id="expenseStore" type="text" placeholder="שם החנות או הספק" required />
+              </label>
+
+              <details class="more-fields full">
+                <summary>עוד פרטים</summary>
+                <div class="more-grid">
+                  <label>
+                    קטגוריה
+                    <input id="expenseCategory" list="categorySuggestions" type="text" placeholder="כללי" />
+                    <datalist id="categorySuggestions"></datalist>
+                  </label>
+
+                  <label>
+                    תאריך
+                    <input id="expenseDate" type="date" required />
+                  </label>
+
+                  <label class="receipt-field">
+                    צילום / קבלה
+                    <input id="expenseReceipt" accept="image/*,.pdf" capture="environment" type="file" />
+                  </label>
+
+                  <label>
+                    הערה
+                    <textarea id="expenseNote" rows="3" placeholder="חשבונית, איש קשר או פרט חשוב"></textarea>
+                  </label>
+                </div>
+              </details>
+
+              <button class="primary full" type="submit">שמור הוצאה</button>
+            </form>
+          </section>
+        </section>
+
+        <section class="view" id="todayView">
+          <section class="summary-grid">
+            <article class="metric metric-total">
+              <span>הוצאות היום</span>
+              <strong id="todayTotal">₪0</strong>
+            </article>
+            <article class="metric">
+              <span>מספר הוצאות</span>
+              <strong id="todayCount">0</strong>
+            </article>
+          </section>
+
+          <section class="panel">
+            <div class="section-title compact-title">
+              <div>
+                <p class="section-kicker">יומן יומי</p>
+                <h2>פירוט היום</h2>
+              </div>
+              <button class="secondary" id="emailTodayBtn" type="button">שלח דוח PDF</button>
+            </div>
+            <div id="todayList" class="expense-list"></div>
+          </section>
+        </section>
+
+        <section class="view" id="projectsView">
+          <section class="panel">
+            <div class="section-title">
+              <div>
+                <p class="section-kicker">ניהול עבודה</p>
+                <h2>פרויקטים פעילים</h2>
+              </div>
+            </div>
+            <form id="projectForm" class="inline-form">
+              <input id="projectName" type="text" placeholder="שם פרויקט חדש" required />
+              <button class="primary" type="submit">הוסף</button>
+            </form>
+            <div id="projectList" class="project-list"></div>
+          </section>
+        </section>
+
+        <section class="view" id="reportsView">
+          <section class="panel">
+            <div class="section-title">
+              <div>
+                <p class="section-kicker">סיכומים</p>
+                <h2>דוחות</h2>
+              </div>
+            </div>
+            <div class="report-controls">
+              <label>
+                חודש
+                <input id="reportMonth" type="month" />
+              </label>
+              <button class="secondary" id="exportMonthBtn" type="button">ייצוא CSV חודשי</button>
+              <button class="secondary" id="emailMonthBtn" type="button">שלח PDF חודשי</button>
+              <button class="secondary" id="exportYearBtn" type="button">ייצוא CSV שנתי</button>
+              <button class="secondary" id="emailYearBtn" type="button">שלח PDF שנתי</button>
+            </div>
+            <div id="reportSummary" class="report-summary"></div>
+          </section>
+        </section>
+
+        <section class="view" id="settingsView">
+          <section class="panel">
+            <div class="section-title">
+              <div>
+                <p class="section-kicker">חיבורים</p>
+                <h2>הגדרות</h2>
+              </div>
+            </div>
+            <form id="settingsForm" class="form-grid">
+              <label class="full">
+                מייל לקבלת סיכומים
+                <input id="summaryEmail" type="email" placeholder="name@example.com" />
+              </label>
+              <details class="more-fields full">
+                <summary>חיבור טכני</summary>
+                <label>
+                  כתובת Google Sheets Web App
+                  <input id="sheetsUrl" type="url" placeholder="כתובת החיבור לגוגל שיטס" />
+                </label>
+              </details>
+              <button class="primary full" type="submit">שמור הגדרות</button>
+            </form>
+            <p class="hint">המערכת מחוברת לגוגל שיטס ושולחת סיכומים למייל דרך Google Apps Script.</p>
+          </section>
+        </section>
+      </main>
+
+      <nav class="tabs" aria-label="ניווט ראשי">
+        <button class="tab active" type="button" data-view="expenseView"><span aria-hidden="true">+</span><small>הוצאה</small></button>
+        <button class="tab" type="button" data-view="todayView"><span aria-hidden="true">₪</span><small>היום</small></button>
+        <button class="tab" type="button" data-view="projectsView"><span aria-hidden="true">▦</span><small>פרויקטים</small></button>
+        <button class="tab" type="button" data-view="reportsView"><span aria-hidden="true">◫</span><small>דוחות</small></button>
+        <button class="tab" type="button" data-view="settingsView"><span aria-hidden="true">⚙</span><small>הגדרות</small></button>
+      </nav>
+    </div>
+
+    <template id="emptyStateTemplate">
+      <div class="empty-state">אין עדיין נתונים להצגה</div>
+    </template>
+
+    <script src="app.js?v=2026070610"></script>
+  </body>
+</html>
