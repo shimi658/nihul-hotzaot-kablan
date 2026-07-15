@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 0.6 seconds
+Output:
 const STORAGE_KEY = "contractor-expense-app-v1";
 const AUTH_KEY = "contractor-expense-auth-v1";
 const DEFAULT_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxnD1RcFoP0tiDTCodCqNV6mTbVHgP_VC0do_eP9GWaF4NmYTKNkcqCh8Ap8I6UTJ_ySA/exec";
@@ -53,6 +56,8 @@ const els = {
 initialize();
 
 function initialize() {
+  const accountActions = document.querySelector("#accountActions");
+  if (accountActions) accountActions.append(els.userEmailBadge, els.logoutBtn, els.installBtn);
   els.currentDateLabel.textContent = dateFormatter.format(new Date());
   els.expenseDate.value = toDateInputValue(new Date());
   els.reportMonth.value = toMonthInputValue(new Date());
@@ -325,3 +330,4 @@ async function installPwa() {
   deferredInstallPrompt = null;
   els.installBtn.hidden = choice.outcome === "accepted";
 }
+
