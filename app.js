@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 0.6 seconds
-Output:
 const STORAGE_KEY = "contractor-expense-app-v1";
 const AUTH_KEY = "contractor-expense-auth-v1";
 const DEFAULT_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxnD1RcFoP0tiDTCodCqNV6mTbVHgP_VC0do_eP9GWaF4NmYTKNkcqCh8Ap8I6UTJ_ySA/exec";
