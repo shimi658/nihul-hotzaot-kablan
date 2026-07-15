@@ -1,4 +1,7 @@
-const CACHE_NAME = "contractor-expenses-v14";
+Exit code: 0
+Wall time: 0.6 seconds
+Output:
+const CACHE_NAME = "contractor-expenses-v15";
 const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./app-icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -14,3 +17,4 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))));
   self.clients.claim();
 });
+
