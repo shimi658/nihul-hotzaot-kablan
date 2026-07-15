@@ -1,3 +1,4 @@
+
 const STORAGE_KEY = "contractor-expense-app-v1";
 const AUTH_KEY = "contractor-expense-auth-v1";
 const DEFAULT_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxnD1RcFoP0tiDTCodCqNV6mTbVHgP_VC0do_eP9GWaF4NmYTKNkcqCh8Ap8I6UTJ_ySA/exec";
@@ -129,10 +130,28 @@ function renderAuthState() {
   if (loggedIn) { els.userEmailBadge.textContent = auth.email; els.summaryEmail.value = state.settings.summaryEmail || "5484916@gmail.com"; }
 }
 async function handleLoginRequest(event) {
-  event.preventDefault(); const email = els.loginEmail.value.trim().toLowerCase(); if (!email) return; setAuthBusy(true);
-  try { await apiPost({ action: "requestLoginCode", email }); pendingLoginEmail = email; els.authEmailLabel.textContent = email; els.loginForm.hidden = true; els.verifyForm.hidden = false; notify("שלחנו קוד כניסה למייל", "success"); }
-  catch { notify("לא הצלחתי לשלוח קוד. בדוק את המייל והחיבור.", "error"); }
-  finally { setAuthBusy(false); }
+  event.preventDefault();
+  const email = els.loginEmail.value.trim().toLowerCase();
+  if (!email) return;
+  pendingLoginEmail = email;
+  els.authEmailLabel.textContent = email;
+  els.loginForm.hidden = true;
+  els.verifyForm.hidden = false;
+  setAuthBusy(true);
+  try {
+    await fetch(state.settings.sheetsUrl || DEFAULT_SHEETS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "requestLoginCode", email }),
+    });
+    notify("קוד הכניסה נשלח. בדוק גם בדואר זבל.", "success");
+    els.loginCode.focus();
+  } catch {
+    notify("מסך הקוד נפתח. אם הקוד לא הגיע, חזור ונסה שוב.", "error");
+  } finally {
+    setAuthBusy(false);
+  }
 }
 async function handleLoginVerify(event) {
   event.preventDefault(); const code = els.loginCode.value.trim(); if (!pendingLoginEmail || !code) return; setAuthBusy(true);
