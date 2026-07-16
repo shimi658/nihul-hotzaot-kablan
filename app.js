@@ -122,7 +122,7 @@ function normalizeState(value) {
   next.expenses.forEach((expense) => { if (!expense.category || expense.category.includes("׳")) expense.category = "כללי"; });
   return next;
 }
-function createDefaultState() { return { projects: [{ id: createId(), name: "פרויקט 1", active: true }, { id: createId(), name: "פרויקט 2", active: true }, { id: createId(), name: "פרויקט 3", active: true }], expenses: [], settings: { summaryEmail: "5484916@gmail.com", sheetsUrl: DEFAULT_SHEETS_URL } }; }
+function createDefaultState() { return { projects: [], expenses: [], settings: { summaryEmail: "5484916@gmail.com", sheetsUrl: DEFAULT_SHEETS_URL } }; }
 
 function renderAuthState() {
   const loggedIn = Boolean(auth?.email && auth?.token);
@@ -163,7 +163,7 @@ function resetAuthForms() { pendingLoginEmail = ""; els.loginCode.value = ""; el
 function setAuthBusy(isBusy) { els.loginForm.querySelectorAll("button,input").forEach((el) => el.disabled = isBusy); els.verifyForm.querySelectorAll("button,input").forEach((el) => el.disabled = isBusy); }
 function logout() { auth = null; saveAuth(); state = normalizeState(createDefaultState()); saveState(); renderAuthState(); renderAll(); }
 async function syncFromServer() { if (!auth?.token) return; try { const result = await apiPost({ action: "listUserData", token: auth.token }); state.projects = normalizeProjects(result.projects || []); state.expenses = normalizeExpenses(result.expenses || []); state.settings.summaryEmail = state.settings.summaryEmail || "5484916@gmail.com"; saveState(); renderAll(); } catch { notify("לא הצלחתי לסנכרן נתונים מהמייל", "error"); } }
-function normalizeProjects(projects) { if (!projects.length) return createDefaultState().projects; return projects.map((project, index) => ({ id: project.id || createId(), name: project.name || "פרויקט " + (index + 1), active: project.active !== false })); }
+function normalizeProjects(projects) { const legacyDefaults = new Set(["פרויקט 1", "פרויקט 2", "פרויקט 3"]); return projects.filter((project) => !legacyDefaults.has(String(project.name || "").trim())).map((project, index) => ({ id: project.id || createId(), name: project.name || "פרויקט " + (index + 1), active: project.active !== false })); }
 function normalizeExpenses(expenses) { return expenses.map((expense) => ({ id: expense.id || createId(), projectId: expense.projectId || findProjectIdByName(expense.projectName), amount: Number(expense.amount || 0), item: expense.item || "", store: expense.store || "", category: expense.category || "כללי", date: expense.date || toDateInputValue(new Date()), note: expense.note || "", receipt: null, createdAt: expense.createdAt || new Date().toISOString() })); }
 function findProjectIdByName(name) { const project = state.projects.find((item) => item.name === name); return project?.id || state.projects[0]?.id || ""; }
 function activateView(viewId) { els.tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === viewId)); els.views.forEach((view) => view.classList.toggle("active", view.id === viewId)); renderAll(); }
