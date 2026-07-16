@@ -239,55 +239,69 @@ async function handleAgentAssist() {
   notify("סידרתי את הטופס. תבדוק ואז שמור.", "success");
 }
 function parseAgentText(text) {
+  const cleanText = text.replace(/\s+/g, " ").trim();
   const activeProjects = state.projects.filter((project) => project.active);
-  const project = activeProjects.find((item) => text.includes(item.name));
-  const projectName = project ? project.name : inferProjectName(text);
-  const amountMatch = text.match(/(\d+(?:[.,]\d+)?)\s*(?:₪|שח|ש"ח|שקל|שקלים)/) || text.match(/(?:ב-|ב\s|על סך|סך)\s*(\d+(?:[.,]\d+)?)/);
-  const amount = amountMatch ? amountMatch[1].replace(",", ".") : "";
-  const category = inferCategory(text);
-  const store = inferStore(text);
-  const item = inferItem(text, amount, store, projectName);
-  return {
-    projectId: project?.id || (projectName ? "" : activeProjects[0]?.id || ""),
-    projectName,
-    amount,
-    item,
-    store,
-    category,
-    note: "נרשם דרך הסוכן החכם: " + text,
-  };
+  const explicitProject = readLabeledValue(cleanText, ["פרויקט", "עבודה"]);
+  const project = activeProjects.find((entry) => normalizeText(cleanText).includes(normalizeText(entry.name)) || (explicitProject && normalizeText(entry.name) === normalizeText(explicitProject)));
+  const projectName = project ? project.name : (explicitProject || inferProjectName(cleanText));
+  const explicitAmount = readLabeledValue(cleanText, ["סכום", "מחיר", "עלות"]);
+  const amountMatch = (explicitAmount || cleanText).match(/(\d{1,3}(?:[,\s]\d{3})*(?:[.]\d+)?|\d+(?:[.,]\d+)?)\s*(?:₪|שח|ש"ח|שקל|שקלים)?/);
+  const amount = amountMatch ? amountMatch[1].replace(/\s/g, "").replace(/,(?=\d{3}(?:\D|$))/g, "").replace(",", ".") : "";
+  const category = readLabeledValue(cleanText, ["קטגוריה", "סוג"]) || inferCategory(cleanText);
+  const store = readLabeledValue(cleanText, ["ספק", "חנות", "בית עסק"]) || inferStore(cleanText);
+  const item = readLabeledValue(cleanText, ["פריט", "מוצר", "מה נקנה", "קנייה"]) || inferItem(cleanText, amount, store, projectName, category);
+  return { projectId: project?.id || "", projectName, amount, item, store, category, note: "נרשם במילוי החכם: " + cleanText };
+}
+function normalizeText(value) { return String(value || "").toLowerCase().replace(/[״"'׳.,:;()\-_]/g, " ").replace(/\s+/g, " ").trim(); }
+function escapeRegex(value) { return String(value).replace(/[.*+?^$()|[\]\\{}]/g, "\\$&"); }
+function readLabeledValue(text, labels) {
+  for (const label of labels) {
+    const match = text.match(new RegExp("(?:^|[,;|])\\s*" + escapeRegex(label) + "\\s*[:=-]\\s*([^,;|]+)", "i"));
+    if (match) return match[1].trim();
+  }
+  return "";
 }
 function inferProjectName(text) {
-  const match = text.match(/(?:לפרויקט|פרויקט)\s+([א-תA-Za-z0-9״׳' -]{2,40})(?=\s+(?:ב|ב-|קניתי|קנה|קנייה|רכשתי|שילמתי|הוצאה|₪|שח|ש"ח|שקל|שקלים|אצל|בחנות|מ)|$)/);
-  if (!match) return "";
-  return match[1].replace(/[.,;:]+$/g, "").trim();
+  const match = text.match(/(?:לפרויקט|בפרויקט|פרויקט)\s+([א-תA-Za-z0-9״׳' -]{2,45}?)(?=\s+(?:קניתי|רכשתי|שילמתי|הזמנתי|במחיר|בסכום|בסך|ב-|אצל|מחנות|מספק|₪|שח|ש"ח|שקל|שקלים)|[,;]|$)/);
+  return match ? match[1].replace(/[.,;:]+$/g, "").trim() : "";
 }
 function inferCategory(text) {
+  const normalized = normalizeText(text);
   const groups = [
-    ["חומרים", ["מלט", "בטון", "ברזל", "עץ", "צבע", "גבס", "צינור", "חשמל", "קרמיקה", "ברגים", "דבק", "חול", "בלוקים"]],
-    ["הובלה", ["הובלה", "משלוח", "מנוף", "משאית", "פריקה"]],
-    ["כלים", ["כלי", "כלים", "מקדחה", "דיסק", "פטיש", "מברגה", "סולם"]],
-    ["עבודה", ["עבודה", "פועל", "פועלים", "קבלן משנה", "שכר"]],
+    ["אינסטלציה", ["אינסטלציה", "צינור", "צנרת", "ברז", "ניאגרה", "אסלה", "כיור", "ביוב", "ניקוז"]],
+    ["חשמל", ["חשמל", "כבל", "חוט", "שקע", "מפסק", "לוח חשמל", "תאורה", "מנורה", "לד"]],
+    ["ריצוף וקרמיקה", ["ריצוף", "רצפה", "קרמיקה", "גרניט פורצלן", "אריח", "פנלים", "רובה"]],
+    ["צבע", ["צבע", "שפכטל", "פריימר", "רולר", "מברשת צבע", "סיד"]],
+    ["גבס ובידוד", ["גבס", "ניצב", "מסלול", "בידוד", "צמר סלעים", "אקוסטי"]],
+    ["חומרי בניין", ["מלט", "בטון", "ברזל", "בלוק", "בלוקים", "חול", "חצץ", "טיט", "דבק", "עץ", "בורג", "ברגים", "מסמר"]],
+    ["כלי עבודה וציוד", ["כלי עבודה", "מקדחה", "מברגה", "דיסק", "פטיש", "סולם", "מסור", "מכונה", "ציוד"]],
+    ["הובלה ומנוף", ["הובלה", "משלוח", "מנוף", "משאית", "פריקה", "פינוי", "מכולה"]],
+    ["עבודה ושכר", ["פועל", "פועלים", "שכר", "יום עבודה", "עובד", "צוות"]],
+    ["קבלני משנה", ["קבלן משנה", "חשמלאי", "אינסטלטור", "רצף", "צבעי", "נגר", "מסגר"]],
+    ["השכרת ציוד", ["השכרה", "שכירות ציוד", "בובקט", "מחפרון", "פיגום", "מערבל"]],
+    ["דלק ונסיעות", ["דלק", "סולר", "בנזין", "חניה", "כביש", "נסיעה", "מונית"]],
+    ["בטיחות", ["קסדה", "אפוד", "כפפות", "נעלי עבודה", "בטיחות", "רתמה", "משקפי מגן"]],
+    ["משרד ואגרות", ["אגרה", "היתר", "רישיון", "הדפסה", "משרד", "תוכנית", "ביטוח"]],
+    ["אוכל וכיבוד", ["אוכל", "שתייה", "כיבוד", "ארוחה", "קפה"]]
   ];
-  const match = groups.find(([, words]) => words.some((word) => text.includes(word)));
+  const match = groups.find(([, words]) => words.some((word) => normalized.includes(normalizeText(word))));
   return match ? match[0] : "כללי";
 }
 function inferStore(text) {
-  const match = text.match(/(?:בחנות\s+|אצל\s+|מ)([א-תA-Za-z0-9״׳' -]{2,28})(?=\s+(?:לפרויקט|פרויקט|₪|שח|ש"ח|שקל|שקלים)|$)/)
-    || text.match(/ב(?!-|\s*\d)([א-תA-Za-z0-9״׳' -]{2,28})(?=\s+(?:לפרויקט|פרויקט|₪|שח|ש"ח|שקל|שקלים)|$)/);
-  return match ? match[1].trim() : "";
+  const patterns = [
+    /(?:אצל|מחנות|בחנות|מספק|מהספק)\s+([א-תA-Za-z0-9״׳' &-]{2,35}?)(?=\s+(?:לפרויקט|בפרויקט|בסכום|בסך|במחיר|ב-|₪|שח|ש"ח|שקל|שקלים)|[,;]|$)/,
+    /(?:ב)([א-תA-Za-z][א-תA-Za-z0-9״׳' &-]{1,30}?)(?=\s+(?:לפרויקט|בפרויקט|בסכום|בסך|₪|שח|ש"ח|שקל|שקלים)|[,;]|$)/
+  ];
+  for (const pattern of patterns) { const match = text.match(pattern); if (match) return match[1].trim(); }
+  return "";
 }
-function inferItem(text, amount, store, projectNameValue) {
-  let cleaned = text
-    .replace(/(?:קניתי|קנה|קנייה|רכשתי|שילמתי|הוצאה|על)/g, " ")
-    .replace(/(?:לפרויקט|פרויקט)/g, " ");
-  [amount, store, projectNameValue].filter(Boolean).forEach((value) => { cleaned = cleaned.replaceAll(value, " "); });
-  cleaned = cleaned
-    .replace(/(?:₪|שח|ש"ח|שקל|שקלים|ב-|מ-|אצל|חנות)/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return cleaned || text.slice(0, 60);
+function inferItem(text, amount, store, projectNameValue, category) {
+  let cleaned = text.replace(/(?:קניתי|רכשתי|הזמנתי|שילמתי עבור|שילמתי על|הוצאה עבור|הוצאה של)/g, " ").replace(/(?:לפרויקט|בפרויקט|פרויקט)/g, " ");
+  [amount, store, projectNameValue, category].filter(Boolean).forEach((value) => { cleaned = cleaned.replace(new RegExp(escapeRegex(value), "gi"), " "); });
+  cleaned = cleaned.replace(/\d[\d,\s.]*(?:₪|שח|ש"ח|שקל|שקלים)?/g, " ").replace(/(?:₪|שח|ש"ח|שקל|שקלים|בסכום|בסך|במחיר|אצל|מחנות|בחנות|מספק|מהספק)/g, " ").replace(/\s+/g, " ").replace(/^[,;:\- ]+|[,;:\- ]+$/g, "").trim();
+  return cleaned || "הוצאה כללית";
 }
+
 function renderCategorySuggestions() { const categories = [...new Set(state.expenses.map((expense) => expense.category).filter(Boolean))]; els.categorySuggestions.innerHTML = ""; categories.forEach((category) => { const option = document.createElement("option"); option.value = category; els.categorySuggestions.append(option); }); }
 function renderToday() { const todayExpenses = getTodayExpenses(); els.todayTotal.textContent = formatter.format(sumExpenses(todayExpenses)); els.todayCount.textContent = String(todayExpenses.length); renderExpenseList(els.todayList, todayExpenses); }
 function renderReports() { const monthExpenses = getMonthExpenses(); const byProject = groupTotals(monthExpenses, (expense) => projectName(expense.projectId)); const byCategory = groupTotals(monthExpenses, (expense) => expense.category); els.reportSummary.innerHTML = ""; els.reportSummary.append(summaryRow("סה״כ בחודש", formatter.format(sumExpenses(monthExpenses)))); els.reportSummary.append(summaryRow("מספר הוצאות", String(monthExpenses.length))); Object.entries(byProject).forEach(([name, total]) => els.reportSummary.append(summaryRow("פרויקט: " + name, formatter.format(total)))); Object.entries(byCategory).forEach(([name, total]) => els.reportSummary.append(summaryRow("קטגוריה: " + name, formatter.format(total)))); }
