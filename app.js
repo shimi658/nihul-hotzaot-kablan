@@ -1,8 +1,9 @@
 
 const STORAGE_KEY = "contractor-expense-app-v1";
 const AUTH_KEY = "contractor-expense-auth-v1";
-const DEFAULT_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxnD1RcFoP0tiDTCodCqNV6mTbVHgP_VC0do_eP9GWaF4NmYTKNkcqCh8Ap8I6UTJ_ySA/exec";
+const DEFAULT_SHEETS_URL = "https://script.google.com/macros/s/AKfycbwefHGh1hPSDOXI28rwrt153v_wZMtN70Ztg_BbtxmpMOdxLJBcU6adNDW-WBSzMhQ0qw/exec";
 const LEGACY_SHEETS_URLS = [
+  "https://script.google.com/macros/s/AKfycbxnD1RcFoP0tiDTCodCqNV6mTbVHgP_VC0do_eP9GWaF4NmYTKNkcqCh8Ap8I6UTJ_ySA/exec",
   "https://script.google.com/macros/s/AKfycbzRgi2IDX8Eduk2DicGlABPFKkqDe9bBHF_iqT6mmVQ9RX83U2X9wBMiU626u9p-2KqxQ/exec",
   "https://script.google.com/macros/s/AKfycbxUGZKhx3kpUx_OvB32s647FfN7t9rGcruUeRUD_9osB6VlFMf2F8njIx-2zOsMClW8zA/exec",
   "https://script.google.com/macros/s/AKfycby5ziTrql5Fs0wpJocx_NzwmCGFt-4IWRyq5MOnU5oxKq_4Z7FogCKqmGTCN1gKELQ-EA/exec",
@@ -221,7 +222,23 @@ function renderProjects() {
 async function handleAgentAssist() {
   const text = els.agentText.value.trim();
   if (!text) { notify("כתוב לסוכן מה נקנה, בכמה ומאיפה", "error"); return; }
-  const parsed = parseAgentText(text);
+  const button = els.agentBtn;
+  const originalLabel = button.textContent;
+  button.disabled = true;
+  button.textContent = "ה-AI מנתח את ההוצאה...";
+  let parsed;
+  try {
+    const activeProjects = state.projects.filter((project) => project.active).map((project) => ({ id: project.id, name: project.name }));
+    const result = await apiPost({ action: "parseExpenseWithAI", token: auth?.token, text, projects: activeProjects });
+    parsed = result.expense;
+  } catch {
+    parsed = parseAgentText(text);
+    notify("ה-AI לא היה זמין, מילאתי לפי זיהוי בסיסי", "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = originalLabel;
+  }
+  if (!parsed) { notify("לא הצלחתי להבין את ההוצאה", "error"); return; }
   if (!parsed.projectId && parsed.projectName) {
     const project = { id: createId(), name: parsed.projectName, active: true };
     state.projects.push(project);
@@ -236,7 +253,7 @@ async function handleAgentAssist() {
   if (parsed.store) els.expenseStore.value = parsed.store;
   if (parsed.category) els.expenseCategory.value = parsed.category;
   els.expenseNote.value = parsed.note;
-  notify("סידרתי את הטופס. תבדוק ואז שמור.", "success");
+  notify("ה-AI סידר את הטופס. תבדוק ואז שמור.", "success");
 }
 function parseAgentText(text) {
   const cleanText = text.replace(/\s+/g, " ").trim();
