@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="app-icon.svg" />
     <title>ניהול הוצאות קבלן</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=2026071701" />
+    <link rel="stylesheet" href="styles.css?v=2026071702" />
   </head>
   <body>
     <section class="install-prompt" id="installPrompt" hidden role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
@@ -70,24 +70,6 @@
 
       <main>
         <section class="view active" id="expenseView">
-          <section class="home-grid" aria-label="סיכום מהיר">
-            <article class="home-card home-card-main">
-              <span>היום</span>
-              <strong id="homeTodayTotal">₪0</strong>
-              <small id="homeTodayCount">0 הוצאות</small>
-            </article>
-            <article class="home-card">
-              <span>החודש</span>
-              <strong id="homeMonthTotal">₪0</strong>
-              <small>סיכום שוטף</small>
-            </article>
-            <article class="home-card">
-              <span>פרויקטים</span>
-              <strong id="homeActiveProjects">0</strong>
-              <small>פעילים</small>
-            </article>
-          </section>
-
           <section class="panel entry-panel">
             <div class="section-title">
               <div>
@@ -154,12 +136,31 @@
                 </div>
               </details>
 
-              <button class="primary full" type="submit">שמור הוצאה</button>
+              <button class="primary full" id="expenseSubmitBtn" type="submit">שמור הוצאה</button>
+              <button class="secondary full" id="cancelExpenseEditBtn" type="button" hidden>ביטול עריכה</button>
             </form>
           </section>
         </section>
 
         <section class="view" id="todayView">
+          <section class="home-grid dashboard-summary" aria-label="סיכום מהיר">
+            <article class="home-card home-card-main">
+              <span>היום</span>
+              <strong id="homeTodayTotal">₪0</strong>
+              <small id="homeTodayCount">0 הוצאות</small>
+            </article>
+            <article class="home-card">
+              <span>החודש</span>
+              <strong id="homeMonthTotal">₪0</strong>
+              <small>סיכום שוטף</small>
+            </article>
+            <article class="home-card">
+              <span>פרויקטים</span>
+              <strong id="homeActiveProjects">0</strong>
+              <small>פעילים</small>
+            </article>
+          </section>
+
           <section class="summary-grid">
             <article class="metric metric-total">
               <span>הוצאות היום</span>
@@ -261,7 +262,7 @@
 
       <nav class="tabs" aria-label="ניווט ראשי">
         <button class="tab active" type="button" data-view="expenseView"><span aria-hidden="true">+</span><small>הוצאה</small></button>
-        <button class="tab" type="button" data-view="todayView"><span aria-hidden="true">₪</span><small>היום</small></button>
+        <button class="tab" type="button" data-view="todayView"><span aria-hidden="true">₪</span><small>סיכום</small></button>
         <button class="tab" type="button" data-view="projectsView"><span aria-hidden="true">▦</span><small>פרויקטים</small></button>
         <button class="tab" type="button" data-view="reportsView"><span aria-hidden="true">◫</span><small>דוחות</small></button>
         <button class="tab" type="button" data-view="settingsView"><span aria-hidden="true">⚙</span><small>הגדרות</small></button>
@@ -272,7 +273,7 @@
       <div class="empty-state">אין עדיין נתונים להצגה</div>
     </template>
 
-    <script src="app.js?v=2026071605"></script>
+    <script src="app.js?v=2026071702"></script>
   </body>
 </html>
 
