@@ -46,7 +46,14 @@ const els = {
   biometricSetupBtn: document.querySelector("#biometricSetupBtn"),
   biometricStatus: document.querySelector("#biometricStatus"),
   logoutBtn: document.querySelector("#logoutBtn"),
+  settingsLogoutBtn: document.querySelector("#settingsLogoutBtn"),
   userEmailBadge: document.querySelector("#userEmailBadge"),
+  greetingText: document.querySelector("#greetingText"),
+  menuBtn: document.querySelector("#menuBtn"),
+  menuCloseBtn: document.querySelector("#menuCloseBtn"),
+  menuBackdrop: document.querySelector("#menuBackdrop"),
+  sideMenu: document.querySelector("#sideMenu"),
+  menuLinks: document.querySelectorAll(".menu-link"),
   tabs: document.querySelectorAll(".tab"), views: document.querySelectorAll(".view"), currentDateLabel: document.querySelector("#currentDateLabel"),
   homeTodayTotal: document.querySelector("#homeTodayTotal"), homeTodayCount: document.querySelector("#homeTodayCount"), homeMonthTotal: document.querySelector("#homeMonthTotal"), homeActiveProjects: document.querySelector("#homeActiveProjects"),
   agentText: document.querySelector("#agentText"), agentBtn: document.querySelector("#agentBtn"),
@@ -61,8 +68,7 @@ const els = {
 initialize();
 
 function initialize() {
-  const accountActions = document.querySelector("#accountActions");
-  if (accountActions) accountActions.append(els.userEmailBadge, els.logoutBtn, els.installBtn);
+  updateGreeting();
   els.currentDateLabel.textContent = dateFormatter.format(new Date());
   els.expenseDate.value = toDateInputValue(new Date());
   els.reportMonth.value = toMonthInputValue(new Date());
@@ -71,6 +77,11 @@ function initialize() {
   els.sheetsUrl.value = state.settings.sheetsUrl;
 
   els.tabs.forEach((tab) => tab.addEventListener("click", () => activateView(tab.dataset.view)));
+  els.menuLinks.forEach((link) => link.addEventListener("click", () => activateView(link.dataset.view)));
+  els.menuBtn.addEventListener("click", openMenu);
+  els.menuCloseBtn.addEventListener("click", closeMenu);
+  els.menuBackdrop.addEventListener("click", closeMenu);
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeMenu(); });
   els.agentBtn.addEventListener("click", handleAgentAssist);
   els.receiptScanBtn.addEventListener("click", handleReceiptScan);
   els.expenseForm.addEventListener("submit", handleExpenseSubmit);
@@ -92,6 +103,7 @@ function initialize() {
   els.biometricLoginBtn.addEventListener("click", loginWithBiometrics);
   els.biometricSetupBtn.addEventListener("click", toggleBiometricLogin);
   els.logoutBtn.addEventListener("click", logout);
+  els.settingsLogoutBtn.addEventListener("click", logout);
 
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
@@ -187,7 +199,7 @@ async function handleLoginVerify(event) {
 }
 function resetAuthForms() { pendingLoginEmail = ""; els.loginCode.value = ""; els.verifyForm.hidden = true; els.loginForm.hidden = false; }
 function setAuthBusy(isBusy) { els.loginForm.querySelectorAll("button,input").forEach((el) => el.disabled = isBusy); els.verifyForm.querySelectorAll("button,input").forEach((el) => el.disabled = isBusy); }
-function logout() { auth = null; saveAuth(); state = normalizeState(createDefaultState()); saveState(); resetAuthForms(); renderAuthState(); renderAll(); }
+function logout() { closeMenu(); auth = null; saveAuth(); state = normalizeState(createDefaultState()); saveState(); resetAuthForms(); renderAuthState(); renderAll(); notify("התנתקת מהחשבון", "success"); }
 
 function isBiometricSupported() {
   return Boolean(window.PublicKeyCredential && navigator.credentials && window.isSecureContext);
@@ -275,7 +287,35 @@ async function syncFromServer() { if (!auth?.token) return; try { const result =
 function normalizeProjects(projects) { const legacyDefaults = new Set(["פרויקט 1", "פרויקט 2", "פרויקט 3"]); return projects.filter((project) => !legacyDefaults.has(String(project.name || "").trim())).map((project, index) => ({ id: project.id || createId(), name: project.name || "פרויקט " + (index + 1), active: project.active !== false })); }
 function normalizeExpenses(expenses) { return expenses.map((expense) => ({ id: expense.id || createId(), projectId: expense.projectId || findProjectIdByName(expense.projectName), amount: Number(expense.amount || 0), item: expense.item || "", store: expense.store || "", category: expense.category || "כללי", date: expense.date || toDateInputValue(new Date()), note: expense.note || "", receipt: null, createdAt: expense.createdAt || new Date().toISOString() })); }
 function findProjectIdByName(name) { const project = state.projects.find((item) => item.name === name); return project?.id || state.projects[0]?.id || ""; }
-function activateView(viewId) { els.tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === viewId)); els.views.forEach((view) => view.classList.toggle("active", view.id === viewId)); renderAll(); }
+function updateGreeting() {
+  const hour = new Date().getHours();
+  const greeting = hour < 5 ? "לילה טוב" : hour < 12 ? "בוקר טוב" : hour < 17 ? "צהריים טובים" : hour < 21 ? "ערב טוב" : "לילה טוב";
+  els.greetingText.textContent = greeting;
+}
+function openMenu() {
+  els.sideMenu.classList.add("open");
+  els.sideMenu.setAttribute("aria-hidden", "false");
+  els.menuBackdrop.hidden = false;
+  requestAnimationFrame(() => els.menuBackdrop.classList.add("visible"));
+  els.menuBtn.setAttribute("aria-expanded", "true");
+  document.body.classList.add("menu-open");
+}
+function closeMenu() {
+  els.sideMenu.classList.remove("open");
+  els.sideMenu.setAttribute("aria-hidden", "true");
+  els.menuBackdrop.classList.remove("visible");
+  els.menuBtn.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("menu-open");
+  window.setTimeout(() => { if (!els.sideMenu.classList.contains("open")) els.menuBackdrop.hidden = true; }, 220);
+}
+function activateView(viewId) {
+  els.tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === viewId));
+  els.menuLinks.forEach((link) => link.classList.toggle("active", link.dataset.view === viewId));
+  els.views.forEach((view) => view.classList.toggle("active", view.id === viewId));
+  closeMenu();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  renderAll();
+}
 
 async function handleExpenseSubmit(event) {
   event.preventDefault(); if (!auth?.token) return renderAuthState();
