@@ -44,7 +44,7 @@ const els = {
   tabs: document.querySelectorAll(".tab"), views: document.querySelectorAll(".view"), currentDateLabel: document.querySelector("#currentDateLabel"),
   homeTodayTotal: document.querySelector("#homeTodayTotal"), homeTodayCount: document.querySelector("#homeTodayCount"), homeMonthTotal: document.querySelector("#homeMonthTotal"), homeActiveProjects: document.querySelector("#homeActiveProjects"),
   agentText: document.querySelector("#agentText"), agentBtn: document.querySelector("#agentBtn"),
-  expenseForm: document.querySelector("#expenseForm"), expenseProject: document.querySelector("#expenseProject"), expenseAmount: document.querySelector("#expenseAmount"), expenseItem: document.querySelector("#expenseItem"), expenseStore: document.querySelector("#expenseStore"), expenseCategory: document.querySelector("#expenseCategory"), expenseDate: document.querySelector("#expenseDate"), expenseReceipt: document.querySelector("#expenseReceipt"), expenseNote: document.querySelector("#expenseNote"), categorySuggestions: document.querySelector("#categorySuggestions"),
+  expenseForm: document.querySelector("#expenseForm"), expenseProject: document.querySelector("#expenseProject"), expenseAmount: document.querySelector("#expenseAmount"), expenseItem: document.querySelector("#expenseItem"), expenseStore: document.querySelector("#expenseStore"), expenseCategory: document.querySelector("#expenseCategory"), expenseDate: document.querySelector("#expenseDate"), expenseReceipt: document.querySelector("#expenseReceipt"), receiptScanBtn: document.querySelector("#receiptScanBtn"), receiptScanStatus: document.querySelector("#receiptScanStatus"), expenseNote: document.querySelector("#expenseNote"), categorySuggestions: document.querySelector("#categorySuggestions"),
   todayTotal: document.querySelector("#todayTotal"), todayCount: document.querySelector("#todayCount"), todayList: document.querySelector("#todayList"), emailTodayBtn: document.querySelector("#emailTodayBtn"),
   projectForm: document.querySelector("#projectForm"), projectName: document.querySelector("#projectName"), projectList: document.querySelector("#projectList"),
   reportMonth: document.querySelector("#reportMonth"), reportSummary: document.querySelector("#reportSummary"), exportMonthBtn: document.querySelector("#exportMonthBtn"), emailMonthBtn: document.querySelector("#emailMonthBtn"), exportYearBtn: document.querySelector("#exportYearBtn"), emailYearBtn: document.querySelector("#emailYearBtn"),
@@ -66,6 +66,7 @@ function initialize() {
 
   els.tabs.forEach((tab) => tab.addEventListener("click", () => activateView(tab.dataset.view)));
   els.agentBtn.addEventListener("click", handleAgentAssist);
+  els.receiptScanBtn.addEventListener("click", handleReceiptScan);
   els.expenseForm.addEventListener("submit", handleExpenseSubmit);
   els.projectForm.addEventListener("submit", handleProjectSubmit);
   els.settingsForm.addEventListener("submit", handleSettingsSubmit);
@@ -358,6 +359,56 @@ async function apiPost(payload) {
   const data = text ? JSON.parse(text) : {};
   if (!response.ok || data.ok === false) throw new Error(data.error || "request failed");
   return data;
+}
+async function handleReceiptScan() {
+  const file = els.expenseReceipt.files[0];
+  if (!file) { notify("צלם או בחר קבלה לפני הסריקה", "error"); return; }
+  if (!file.type.startsWith("image/")) { notify("כרגע ניתן לסרוק תמונות קבלה בלבד", "error"); return; }
+  const button = els.receiptScanBtn;
+  button.disabled = true;
+  button.textContent = "ה-AI קורא את הקבלה...";
+  els.receiptScanStatus.textContent = "מזהה סכום, ספק, תאריך ופריטים";
+  try {
+    const image = await compressReceiptImage(file);
+    const result = await apiPost({ action: "parseReceiptWithAI", token: auth?.token, receipt: image });
+    const expense = result.expense || {};
+    if (expense.amount) els.expenseAmount.value = expense.amount;
+    if (expense.item) els.expenseItem.value = expense.item;
+    if (expense.store) els.expenseStore.value = expense.store;
+    if (expense.category) els.expenseCategory.value = expense.category;
+    if (expense.date) els.expenseDate.value = expense.date;
+    if (expense.note) els.expenseNote.value = expense.note;
+    els.receiptScanStatus.textContent = "הקבלה נקראה בהצלחה — כדאי לבדוק לפני שמירה";
+    notify("ה-AI מילא את פרטי הקבלה", "success");
+  } catch {
+    els.receiptScanStatus.textContent = "לא הצלחנו לקרוא את הקבלה. נסה צילום ברור יותר";
+    notify("סריקת הקבלה נכשלה. נסה שוב בתאורה טובה", "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = "✨ סרוק קבלה עם AI";
+  }
+}
+function compressReceiptImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = reject;
+      image.onload = () => {
+        const maxSide = 1600;
+        const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+        resolve({ mimeType: "image/jpeg", data: dataUrl.split(",")[1] });
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 function fileToDataUrl(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve({ name: file.name, type: file.type, dataUrl: reader.result }); reader.onerror = reject; reader.readAsDataURL(file); }); }
 function toDateInputValue(date) { return date.getFullYear() + "-" + pad(date.getMonth() + 1) + "-" + pad(date.getDate()); }
