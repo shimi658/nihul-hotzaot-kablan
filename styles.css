@@ -1005,3 +1005,26 @@ input:focus, select:focus, textarea:focus {
   .agent-box { padding: 11px; }
   .tabs { bottom: max(6px, env(safe-area-inset-bottom)); }
 }
+
+/* Photographic construction background and glass panels */
+body {
+  background:
+    linear-gradient(145deg, rgba(239,246,255,.88), rgba(255,247,237,.90)),
+    url("./construction-background.png") center / cover fixed no-repeat !important;
+}
+.app-shell { background: rgba(248,250,252,.58); backdrop-filter: blur(8px); border-radius: 26px; }
+.panel,.home-card,.metric,.expense-card,.project-card {
+  background: rgba(255,255,255,.88) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,.78) !important;
+  box-shadow: 0 14px 36px rgba(15,23,42,.12) !important;
+}
+.entry-panel { max-width: 760px; margin-inline: auto; }
+.dashboard-summary { margin-bottom: 18px; }
+.expense-actions { display:flex; gap:10px; margin-top:14px; padding-top:12px; border-top:1px solid rgba(148,163,184,.22); }
+.expense-actions button { min-width:96px; min-height:42px; }
+@media(max-width:720px) {
+  body { background-attachment:scroll !important; }
+  .app-shell { backdrop-filter:none; }
+  .expense-actions button { flex:1; }
+}
