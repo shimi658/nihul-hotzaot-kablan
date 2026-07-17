@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="app-icon.svg" />
     <title>ניהול הוצאות קבלן</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles-menu-v7.css" />
+    <link rel="stylesheet" href="styles-menu-v8.css" />
   </head>
   <body>
     <section class="install-prompt" id="installPrompt" hidden role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
@@ -70,9 +70,14 @@
           <p id="greetingText">בוקר טוב</p>
           <h1 id="greetingSummary">היום עדיין לא נרשמו הוצאות</h1>
         </div>
-        <button class="install-button topbar-install" id="installBtn" hidden type="button" aria-label="התקנה במסך הבית">
-          <span aria-hidden="true">+</span>
-        </button>
+        <div class="topbar-actions">
+          <button class="refresh-button" id="refreshBtn" type="button" aria-label="בדיקת עדכונים וריענון" title="ריענון האפליקציה">
+            <span aria-hidden="true">↻</span>
+          </button>
+          <button class="install-button topbar-install" id="installBtn" hidden type="button" aria-label="התקנה במסך הבית">
+            <span aria-hidden="true">+</span>
+          </button>
+        </div>
       </header>
 
       <div class="menu-backdrop" id="menuBackdrop" hidden></div>
@@ -318,7 +323,7 @@
       <div class="empty-state">אין עדיין נתונים להצגה</div>
     </template>
 
-    <script src="app-menu-v6.js"></script>
+    <script src="app-menu-v7.js"></script>
   </body>
 </html>
 
