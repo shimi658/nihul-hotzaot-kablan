@@ -1010,7 +1010,7 @@ input:focus, select:focus, textarea:focus {
 body {
   background:
     linear-gradient(145deg, rgba(239,246,255,.88), rgba(255,247,237,.90)),
-    url("./construction-background.png") center / cover fixed no-repeat !important;
+    url("./construction-background.svg") center / cover fixed no-repeat !important;
 }
 .app-shell { background: rgba(248,250,252,.58); backdrop-filter: blur(8px); border-radius: 26px; }
 .panel,.home-card,.metric,.expense-card,.project-card {
