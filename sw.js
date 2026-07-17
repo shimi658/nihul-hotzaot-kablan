@@ -1,6 +1,6 @@
 
-const CACHE_NAME = "contractor-expenses-v23";
-const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./app-icon.svg"];
+const CACHE_NAME = "contractor-expenses-v24";
+const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./app-icon.svg", "./construction-background.png"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
