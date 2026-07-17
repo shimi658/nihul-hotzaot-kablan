@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="app-icon.svg" />
     <title>ניהול הוצאות קבלן</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=2026071704" />
+    <link rel="stylesheet" href="styles.css?v=2026071705" />
   </head>
   <body>
     <section class="install-prompt" id="installPrompt" hidden role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
@@ -62,20 +62,41 @@
       </div>
     </section>
     <div class="app-shell">
-      <header class="hero-card">
-        <div class="hero-content">
-          <p class="eyebrow">ניהול הוצאות קבלן</p>
-          <h1>יומן הוצאות לפרויקטים</h1>
-          <p class="hero-copy">רישום מהיר מהטלפון, בלי טפסים כבדים ובלי בלגן.</p>
+      <header class="app-topbar">
+        <button class="menu-button" id="menuBtn" type="button" aria-label="פתיחת תפריט" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="greeting-block">
+          <p id="greetingText">בוקר טוב</p>
+          <h1>ניהול הוצאות</h1>
         </div>
-        <div class="user-actions">
-          <span class="user-email" id="userEmailBadge" hidden></span>
-          <button class="secondary logout-button" id="logoutBtn" hidden type="button">יציאה</button>
-          <button class="install-button" id="installBtn" hidden type="button" aria-label="התקנה במסך הבית">
-            <span aria-hidden="true">+</span>
-          </button>
-        </div>
+        <button class="install-button topbar-install" id="installBtn" hidden type="button" aria-label="התקנה במסך הבית">
+          <span aria-hidden="true">+</span>
+        </button>
       </header>
+
+      <div class="menu-backdrop" id="menuBackdrop" hidden></div>
+      <aside class="side-menu" id="sideMenu" aria-hidden="true" aria-label="תפריט ראשי">
+        <div class="side-menu-header">
+          <div class="menu-brand">
+            <img src="app-icon.svg" width="52" height="52" alt="" />
+            <div><strong>ניהול הוצאות</strong><span>הקבלן החכם שלך</span></div>
+          </div>
+          <button class="menu-close" id="menuCloseBtn" type="button" aria-label="סגירת תפריט">×</button>
+        </div>
+        <div class="menu-account">
+          <span class="menu-avatar" aria-hidden="true">👤</span>
+          <div><small>מחובר בתור</small><span class="user-email" id="userEmailBadge" hidden></span></div>
+        </div>
+        <nav class="side-menu-links" aria-label="קטגוריות">
+          <button class="menu-link active" type="button" data-view="expenseView"><span class="menu-link-icon purple">＋</span><span><strong>הוצאה חדשה</strong><small>רישום הוצאה מהיר</small></span><b>‹</b></button>
+          <button class="menu-link" type="button" data-view="todayView"><span class="menu-link-icon green">₪</span><span><strong>סיכום הוצאות</strong><small>היום והחודש במבט אחד</small></span><b>‹</b></button>
+          <button class="menu-link" type="button" data-view="projectsView"><span class="menu-link-icon orange">▦</span><span><strong>פרויקטים</strong><small>ניהול אתרי העבודה</small></span><b>‹</b></button>
+          <button class="menu-link" type="button" data-view="reportsView"><span class="menu-link-icon blue">▤</span><span><strong>דוחות</strong><small>PDF, חודשי ושנתי</small></span><b>‹</b></button>
+          <button class="menu-link" type="button" data-view="settingsView"><span class="menu-link-icon pink">⚙</span><span><strong>הגדרות</strong><small>חשבון, מייל ואבטחה</small></span><b>‹</b></button>
+        </nav>
+        <button class="menu-logout" id="logoutBtn" hidden type="button"><span>↪</span> התנתקות מהחשבון</button>
+      </aside>
 
       <main>
         <section class="view active" id="expenseView">
@@ -241,7 +262,9 @@
                 <p class="hint account-hint">כאן אפשר לראות מי מחובר או לצאת מהמערכת.</p>
               </div>
             </div>
-            <div class="account-actions" id="accountActions"></div>
+            <div class="account-actions" id="accountActions">
+              <button class="secondary logout-button settings-logout" id="settingsLogoutBtn" type="button">התנתקות מהחשבון</button>
+            </div>
           </section>
           <section class="panel biometric-panel">
             <div class="account-copy">
@@ -293,7 +316,7 @@
       <div class="empty-state">אין עדיין נתונים להצגה</div>
     </template>
 
-    <script src="app.js?v=2026071703"></script>
+    <script src="app.js?v=2026071704"></script>
   </body>
 </html>
 
