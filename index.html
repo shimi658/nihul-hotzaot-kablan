@@ -142,7 +142,9 @@
 
                   <label class="receipt-field">
                     צילום / קבלה
-                    <input id="expenseReceipt" accept="image/*,.pdf" capture="environment" type="file" />
+                    <input id="expenseReceipt" accept="image/*" capture="environment" type="file" />
+                    <button class="receipt-ai-button" id="receiptScanBtn" type="button">✨ סרוק קבלה עם AI</button>
+                    <span class="receipt-scan-status" id="receiptScanStatus" aria-live="polite"></span>
                   </label>
 
                   <label>
