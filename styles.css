@@ -789,3 +789,24 @@ input:focus,select:focus,textarea:focus { border-color:#8b5cf6; box-shadow:0 0 0
   .tab span { width:27px; height:27px; }
 }
 
+
+.receipt-ai-button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #6d4aff, #2f7cf6);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(79, 84, 220, 0.22);
+}
+.receipt-ai-button:disabled { opacity: 0.7; cursor: wait; }
+.receipt-scan-status {
+  display: block;
+  min-height: 20px;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
