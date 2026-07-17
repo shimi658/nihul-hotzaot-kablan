@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="app-icon.svg" />
     <title>ניהול הוצאות קבלן</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles-menu-v1.css" />
+    <link rel="stylesheet" href="styles-menu-v2.css" />
   </head>
   <body>
     <section class="install-prompt" id="installPrompt" hidden role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
@@ -68,7 +68,7 @@
         </button>
         <div class="greeting-block">
           <p id="greetingText">בוקר טוב</p>
-          <h1>ניהול הוצאות</h1>
+          <h1 id="greetingSummary">היום עדיין לא נרשמו הוצאות</h1>
         </div>
         <button class="install-button topbar-install" id="installBtn" hidden type="button" aria-label="התקנה במסך הבית">
           <span aria-hidden="true">+</span>
@@ -303,20 +303,14 @@
         </section>
       </main>
 
-      <nav class="tabs" aria-label="ניווט ראשי">
-        <button class="tab active" type="button" data-view="expenseView"><span aria-hidden="true">+</span><small>הוצאה</small></button>
-        <button class="tab" type="button" data-view="todayView"><span aria-hidden="true">₪</span><small>סיכום</small></button>
-        <button class="tab" type="button" data-view="projectsView"><span aria-hidden="true">▦</span><small>פרויקטים</small></button>
-        <button class="tab" type="button" data-view="reportsView"><span aria-hidden="true">◫</span><small>דוחות</small></button>
-        <button class="tab" type="button" data-view="settingsView"><span aria-hidden="true">⚙</span><small>הגדרות</small></button>
-      </nav>
+
     </div>
 
     <template id="emptyStateTemplate">
       <div class="empty-state">אין עדיין נתונים להצגה</div>
     </template>
 
-    <script src="app-menu-v1.js"></script>
+    <script src="app-menu-v2.js"></script>
   </body>
 </html>
 
