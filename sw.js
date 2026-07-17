@@ -1,6 +1,6 @@
 
-const CACHE_NAME = "contractor-expenses-v36";
-const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./styles-menu-v1.css", "./app-menu-v1.js", "./styles-menu-v2.css", "./app-menu-v2.js", "./styles-menu-v3.css", "./styles-menu-v4.css", "./styles-menu-v5.css", "./styles-menu-v6.css", "./styles-menu-v7.css", "./app-menu-v6.js", "./app-menu-v3.js", "./app-menu-v4.js", "./app-menu-v5.js", "./manifest.webmanifest", "./app-icon.svg", "./construction-background.svg"];
+const CACHE_NAME = "contractor-expenses-v37";
+const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./styles-menu-v1.css", "./app-menu-v1.js", "./styles-menu-v2.css", "./app-menu-v2.js", "./styles-menu-v3.css", "./styles-menu-v4.css", "./styles-menu-v5.css", "./styles-menu-v6.css", "./styles-menu-v7.css", "./styles-menu-v8.css", "./app-menu-v7.js", "./app-menu-v6.js", "./app-menu-v3.js", "./app-menu-v4.js", "./app-menu-v5.js", "./manifest.webmanifest", "./app-icon.svg", "./construction-background.svg"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
