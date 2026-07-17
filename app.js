@@ -25,6 +25,7 @@ let state = normalizeState(loadState());
 let auth = loadAuth();
 let deferredInstallPrompt = null;
 let pendingLoginEmail = "";
+let editingExpenseId = null;
 const INSTALL_DISMISSED_KEY = "contractor-expense-install-dismissed";
 
 const formatter = new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 });
@@ -44,7 +45,7 @@ const els = {
   tabs: document.querySelectorAll(".tab"), views: document.querySelectorAll(".view"), currentDateLabel: document.querySelector("#currentDateLabel"),
   homeTodayTotal: document.querySelector("#homeTodayTotal"), homeTodayCount: document.querySelector("#homeTodayCount"), homeMonthTotal: document.querySelector("#homeMonthTotal"), homeActiveProjects: document.querySelector("#homeActiveProjects"),
   agentText: document.querySelector("#agentText"), agentBtn: document.querySelector("#agentBtn"),
-  expenseForm: document.querySelector("#expenseForm"), expenseProject: document.querySelector("#expenseProject"), expenseAmount: document.querySelector("#expenseAmount"), expenseItem: document.querySelector("#expenseItem"), expenseStore: document.querySelector("#expenseStore"), expenseCategory: document.querySelector("#expenseCategory"), expenseDate: document.querySelector("#expenseDate"), expenseReceipt: document.querySelector("#expenseReceipt"), receiptScanBtn: document.querySelector("#receiptScanBtn"), receiptScanStatus: document.querySelector("#receiptScanStatus"), expenseNote: document.querySelector("#expenseNote"), categorySuggestions: document.querySelector("#categorySuggestions"),
+  expenseForm: document.querySelector("#expenseForm"), expenseProject: document.querySelector("#expenseProject"), expenseAmount: document.querySelector("#expenseAmount"), expenseItem: document.querySelector("#expenseItem"), expenseStore: document.querySelector("#expenseStore"), expenseCategory: document.querySelector("#expenseCategory"), expenseDate: document.querySelector("#expenseDate"), expenseReceipt: document.querySelector("#expenseReceipt"), receiptScanBtn: document.querySelector("#receiptScanBtn"), receiptScanStatus: document.querySelector("#receiptScanStatus"), expenseNote: document.querySelector("#expenseNote"), expenseSubmitBtn: document.querySelector("#expenseSubmitBtn"), cancelExpenseEditBtn: document.querySelector("#cancelExpenseEditBtn"), categorySuggestions: document.querySelector("#categorySuggestions"),
   todayTotal: document.querySelector("#todayTotal"), todayCount: document.querySelector("#todayCount"), todayList: document.querySelector("#todayList"), emailTodayBtn: document.querySelector("#emailTodayBtn"),
   projectForm: document.querySelector("#projectForm"), projectName: document.querySelector("#projectName"), projectList: document.querySelector("#projectList"),
   reportMonth: document.querySelector("#reportMonth"), reportSummary: document.querySelector("#reportSummary"), exportMonthBtn: document.querySelector("#exportMonthBtn"), emailMonthBtn: document.querySelector("#emailMonthBtn"), exportYearBtn: document.querySelector("#exportYearBtn"), emailYearBtn: document.querySelector("#emailYearBtn"),
@@ -68,6 +69,7 @@ function initialize() {
   els.agentBtn.addEventListener("click", handleAgentAssist);
   els.receiptScanBtn.addEventListener("click", handleReceiptScan);
   els.expenseForm.addEventListener("submit", handleExpenseSubmit);
+  els.cancelExpenseEditBtn.addEventListener("click", resetExpenseForm);
   els.projectForm.addEventListener("submit", handleProjectSubmit);
   els.settingsForm.addEventListener("submit", handleSettingsSubmit);
   els.reportMonth.addEventListener("change", renderReports);
@@ -172,10 +174,50 @@ function activateView(viewId) { els.tabs.forEach((tab) => tab.classList.toggle("
 
 async function handleExpenseSubmit(event) {
   event.preventDefault(); if (!auth?.token) return renderAuthState();
-  const receipt = els.expenseReceipt.files[0] ? await fileToDataUrl(els.expenseReceipt.files[0]) : null;
-  const expense = { id: createId(), projectId: els.expenseProject.value, amount: Number(els.expenseAmount.value), item: els.expenseItem.value.trim(), store: els.expenseStore.value.trim(), category: els.expenseCategory.value.trim() || "כללי", date: els.expenseDate.value, note: els.expenseNote.value.trim(), receipt, createdAt: new Date().toISOString() };
-  state.expenses.unshift(expense); saveState(); els.expenseForm.reset(); els.expenseDate.value = toDateInputValue(new Date()); renderAll(); activateView("todayView"); notify("ההוצאה נשמרה", "success");
-  try { await sendToSheets(expense); } catch {}
+  const existing = editingExpenseId ? state.expenses.find((item) => item.id === editingExpenseId) : null;
+  const uploadedReceipt = els.expenseReceipt.files[0] ? await fileToDataUrl(els.expenseReceipt.files[0]) : null;
+  const expense = { id: existing?.id || createId(), projectId: els.expenseProject.value, amount: Number(els.expenseAmount.value), item: els.expenseItem.value.trim(), store: els.expenseStore.value.trim(), category: els.expenseCategory.value.trim() || "כללי", date: els.expenseDate.value, note: els.expenseNote.value.trim(), receipt: uploadedReceipt || existing?.receipt || null, createdAt: existing?.createdAt || new Date().toISOString() };
+  if (existing) state.expenses = state.expenses.map((item) => item.id === expense.id ? expense : item);
+  else state.expenses.unshift(expense);
+  saveState(); resetExpenseForm(); renderAll(); activateView("todayView"); notify(existing ? "ההוצאה עודכנה" : "ההוצאה נשמרה", "success");
+  try { if (existing) await apiPost({ action: "updateExpense", token: auth.token, expense: { ...expense, projectName: projectName(expense.projectId) } }); else await sendToSheets(expense); }
+  catch { notify("השינוי נשמר במכשיר, אבל הסנכרון לענן לא הצליח כרגע.", "error"); }
+}
+
+function editExpense(expenseId) {
+  const expense = state.expenses.find((item) => item.id === expenseId);
+  if (!expense) return;
+  editingExpenseId = expense.id;
+  renderProjectOptions();
+  els.expenseProject.value = expense.projectId;
+  els.expenseAmount.value = expense.amount;
+  els.expenseItem.value = expense.item;
+  els.expenseStore.value = expense.store;
+  els.expenseCategory.value = expense.category;
+  els.expenseDate.value = expense.date;
+  els.expenseNote.value = expense.note || "";
+  els.expenseSubmitBtn.textContent = "שמור שינויים";
+  els.cancelExpenseEditBtn.hidden = false;
+  activateView("expenseView");
+  document.querySelector(".entry-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  els.expenseAmount.focus();
+}
+
+async function deleteExpense(expenseId) {
+  const expense = state.expenses.find((item) => item.id === expenseId);
+  if (!expense || !window.confirm("למחוק את ההוצאה הזאת?")) return;
+  state.expenses = state.expenses.filter((item) => item.id !== expenseId);
+  saveState(); renderAll(); notify("ההוצאה נמחקה", "success");
+  try { await apiPost({ action: "deleteExpense", token: auth.token, expenseId }); }
+  catch { notify("ההוצאה נמחקה מהמכשיר, אבל הסנכרון לענן לא הצליח כרגע.", "error"); }
+}
+
+function resetExpenseForm() {
+  editingExpenseId = null;
+  els.expenseForm.reset();
+  els.expenseDate.value = toDateInputValue(new Date());
+  els.expenseSubmitBtn.textContent = "שמור הוצאה";
+  els.cancelExpenseEditBtn.hidden = true;
 }
 async function handleProjectSubmit(event) { event.preventDefault(); if (!auth?.token) return renderAuthState(); const name = els.projectName.value.trim(); if (!name) return; const project = { id: createId(), name, active: true }; state.projects.push(project); saveState(); els.projectForm.reset(); renderAll(); notify("הפרויקט נוסף", "success"); try { await apiPost({ action: "saveProject", token: auth.token, project }); } catch {} }
 async function deleteProject(projectId) {
@@ -323,7 +365,21 @@ function inferItem(text, amount, store, projectNameValue, category) {
 function renderCategorySuggestions() { const categories = [...new Set(state.expenses.map((expense) => expense.category).filter(Boolean))]; els.categorySuggestions.innerHTML = ""; categories.forEach((category) => { const option = document.createElement("option"); option.value = category; els.categorySuggestions.append(option); }); }
 function renderToday() { const todayExpenses = getTodayExpenses(); els.todayTotal.textContent = formatter.format(sumExpenses(todayExpenses)); els.todayCount.textContent = String(todayExpenses.length); renderExpenseList(els.todayList, todayExpenses); }
 function renderReports() { const monthExpenses = getMonthExpenses(); const byProject = groupTotals(monthExpenses, (expense) => projectName(expense.projectId)); const byCategory = groupTotals(monthExpenses, (expense) => expense.category); els.reportSummary.innerHTML = ""; els.reportSummary.append(summaryRow("סה״כ בחודש", formatter.format(sumExpenses(monthExpenses)))); els.reportSummary.append(summaryRow("מספר הוצאות", String(monthExpenses.length))); Object.entries(byProject).forEach(([name, total]) => els.reportSummary.append(summaryRow("פרויקט: " + name, formatter.format(total)))); Object.entries(byCategory).forEach(([name, total]) => els.reportSummary.append(summaryRow("קטגוריה: " + name, formatter.format(total)))); }
-function renderExpenseList(container, expenses) { container.innerHTML = ""; if (!expenses.length) { container.append(emptyState()); return; } expenses.forEach((expense) => { const card = document.createElement("article"); card.className = "expense-card"; const note = expense.note ? "<p class=\"hint\">" + escapeHtml(expense.note) + "</p>" : ""; card.innerHTML = "<header><strong>" + escapeHtml(expense.item) + "</strong><strong>" + formatter.format(expense.amount) + "</strong></header><div class=\"expense-meta\"><span>" + escapeHtml(projectName(expense.projectId)) + "</span><span>" + escapeHtml(expense.store) + "</span><span>" + escapeHtml(expense.category) + "</span><span>" + dateFormatter.format(parseLocalDate(expense.date)) + "</span></div>" + note; if (expense.receipt) { const link = document.createElement("a"); link.className = "receipt-link"; link.href = expense.receipt.dataUrl; link.target = "_blank"; link.rel = "noreferrer"; link.textContent = "פתח קבלה"; card.append(link); } container.append(card); }); }
+function renderExpenseList(container, expenses) {
+  container.innerHTML = "";
+  if (!expenses.length) { container.append(emptyState()); return; }
+  expenses.forEach((expense) => {
+    const card = document.createElement("article");
+    card.className = "expense-card";
+    const note = expense.note ? "<p class=\"hint\">" + escapeHtml(expense.note) + "</p>" : "";
+    card.innerHTML = "<header><strong>" + escapeHtml(expense.item) + "</strong><strong>" + formatter.format(expense.amount) + "</strong></header><div class=\"expense-meta\"><span>" + escapeHtml(projectName(expense.projectId)) + "</span><span>" + escapeHtml(expense.store) + "</span><span>" + escapeHtml(expense.category) + "</span><span>" + dateFormatter.format(parseLocalDate(expense.date)) + "</span></div>" + note;
+    if (expense.receipt) { const link = document.createElement("a"); link.className = "receipt-link"; link.href = expense.receipt.dataUrl; link.target = "_blank"; link.rel = "noreferrer"; link.textContent = "פתח קבלה"; card.append(link); }
+    const actions = document.createElement("div"); actions.className = "expense-actions";
+    const editBtn = document.createElement("button"); editBtn.className = "secondary"; editBtn.type = "button"; editBtn.textContent = "עריכה"; editBtn.addEventListener("click", () => editExpense(expense.id));
+    const deleteBtn = document.createElement("button"); deleteBtn.className = "danger"; deleteBtn.type = "button"; deleteBtn.textContent = "מחיקה"; deleteBtn.addEventListener("click", () => deleteExpense(expense.id));
+    actions.append(editBtn, deleteBtn); card.append(actions); container.append(card);
+  });
+}
 function summaryRow(label, value) { const row = document.createElement("div"); row.className = "summary-row"; row.innerHTML = "<span>" + escapeHtml(label) + "</span><strong>" + escapeHtml(value) + "</strong>"; return row; }
 function emptyState() { return document.querySelector("#emptyStateTemplate").content.cloneNode(true); }
 function getTodayExpenses() { const today = toDateInputValue(new Date()); return state.expenses.filter((expense) => expense.date === today); }
