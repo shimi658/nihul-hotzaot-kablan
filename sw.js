@@ -1,6 +1,6 @@
 
-const CACHE_NAME = "contractor-expenses-v29";
-const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./styles-menu-v1.css", "./app-menu-v1.js", "./styles-menu-v2.css", "./app-menu-v2.js", "./manifest.webmanifest", "./app-icon.svg", "./construction-background.svg"];
+const CACHE_NAME = "contractor-expenses-v30";
+const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./styles-menu-v1.css", "./app-menu-v1.js", "./styles-menu-v2.css", "./app-menu-v2.js", "./styles-menu-v3.css", "./manifest.webmanifest", "./app-icon.svg", "./construction-background.svg"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
