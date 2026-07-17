@@ -1028,3 +1028,14 @@ body {
   .app-shell { backdrop-filter:none; }
   .expense-actions button { flex:1; }
 }
+
+/* Keep the construction photo crisp: no blur anywhere */
+.app-shell,
+.panel,
+.home-card,
+.metric,
+.expense-card,
+.project-card {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
