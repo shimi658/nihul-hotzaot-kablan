@@ -1039,3 +1039,33 @@ body {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
+
+
+/* Biometric sign-in */
+.biometric-login { margin-top: 18px; }
+.auth-divider { display:flex; align-items:center; gap:12px; margin:16px 0; color:var(--muted); font-size:.85rem; }
+.auth-divider::before, .auth-divider::after { content:""; height:1px; background:rgba(73,64,129,.16); flex:1; }
+.biometric-button {
+  border:1px solid rgba(91,75,219,.25);
+  background:linear-gradient(135deg,#6558e8,#4b3bc5);
+  color:#fff;
+  min-height:54px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  font:700 1rem "Heebo",sans-serif;
+  box-shadow:0 10px 22px rgba(76,59,197,.2);
+  cursor:pointer;
+}
+.biometric-button:disabled { opacity:.65; cursor:wait; }
+.biometric-icon { font-size:1.45rem; }
+.biometric-hint { text-align:center; margin:9px 0 0; }
+.biometric-panel { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.biometric-shield { background:linear-gradient(135deg,#e7e3ff,#d5f5ee); }
+.biometric-settings-button { white-space:nowrap; }
+@media (max-width:700px) {
+  .biometric-panel { align-items:stretch; flex-direction:column; }
+  .biometric-settings-button { width:100%; }
+}
