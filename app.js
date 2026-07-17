@@ -1,6 +1,7 @@
 
 const STORAGE_KEY = "contractor-expense-app-v1";
 const AUTH_KEY = "contractor-expense-auth-v1";
+const BIOMETRIC_KEY = "contractor-expense-biometric-v1";
 const DEFAULT_SHEETS_URL = "https://script.google.com/macros/s/AKfycbwefHGh1hPSDOXI28rwrt153v_wZMtN70Ztg_BbtxmpMOdxLJBcU6adNDW-WBSzMhQ0qw/exec";
 const LEGACY_SHEETS_URLS = [
   "https://script.google.com/macros/s/AKfycbxnD1RcFoP0tiDTCodCqNV6mTbVHgP_VC0do_eP9GWaF4NmYTKNkcqCh8Ap8I6UTJ_ySA/exec",
@@ -40,6 +41,10 @@ const els = {
   loginCode: document.querySelector("#loginCode"),
   authEmailLabel: document.querySelector("#authEmailLabel"),
   authBackBtn: document.querySelector("#authBackBtn"),
+  biometricLogin: document.querySelector("#biometricLogin"),
+  biometricLoginBtn: document.querySelector("#biometricLoginBtn"),
+  biometricSetupBtn: document.querySelector("#biometricSetupBtn"),
+  biometricStatus: document.querySelector("#biometricStatus"),
   logoutBtn: document.querySelector("#logoutBtn"),
   userEmailBadge: document.querySelector("#userEmailBadge"),
   tabs: document.querySelectorAll(".tab"), views: document.querySelectorAll(".view"), currentDateLabel: document.querySelector("#currentDateLabel"),
@@ -84,6 +89,8 @@ function initialize() {
   els.loginForm.addEventListener("submit", handleLoginRequest);
   els.verifyForm.addEventListener("submit", handleLoginVerify);
   els.authBackBtn.addEventListener("click", resetAuthForms);
+  els.biometricLoginBtn.addEventListener("click", loginWithBiometrics);
+  els.biometricSetupBtn.addEventListener("click", toggleBiometricLogin);
   els.logoutBtn.addEventListener("click", logout);
 
   window.addEventListener("beforeinstallprompt", (event) => {
@@ -130,8 +137,23 @@ function createDefaultState() { return { projects: [], expenses: [], settings: {
 
 function renderAuthState() {
   const loggedIn = Boolean(auth?.email && auth?.token);
+  const biometric = loadBiometric();
+  const biometricSupported = isBiometricSupported();
   els.authView.hidden = loggedIn; els.appShell.hidden = !loggedIn; els.logoutBtn.hidden = !loggedIn; els.userEmailBadge.hidden = !loggedIn;
-  if (loggedIn) { els.userEmailBadge.textContent = auth.email; els.summaryEmail.value = state.settings.summaryEmail || "5484916@gmail.com"; }
+  els.biometricLogin.hidden = loggedIn || !biometricSupported || !biometric;
+  els.biometricSetupBtn.hidden = !biometricSupported;
+  if (loggedIn) {
+    els.userEmailBadge.textContent = auth.email;
+    els.summaryEmail.value = state.settings.summaryEmail || "5484916@gmail.com";
+    const enabledHere = biometric?.email === auth.email;
+    els.biometricSetupBtn.textContent = enabledHere ? "בטל כניסה ביומטרית" : "הפעל כניסה ביומטרית";
+    els.biometricSetupBtn.classList.toggle("secondary", enabledHere);
+    els.biometricSetupBtn.classList.toggle("primary", !enabledHere);
+    els.biometricStatus.textContent = enabledHere
+      ? "הכניסה הביומטרית פעילה במכשיר הזה."
+      : "אפשר להפעיל כניסה מהירה ומאובטחת במכשיר הזה.";
+  }
+  if (!biometricSupported) els.biometricStatus.textContent = "המכשיר או הדפדפן הזה אינם תומכים בזיהוי ביומטרי.";
 }
 async function handleLoginRequest(event) {
   event.preventDefault();
@@ -165,7 +187,90 @@ async function handleLoginVerify(event) {
 }
 function resetAuthForms() { pendingLoginEmail = ""; els.loginCode.value = ""; els.verifyForm.hidden = true; els.loginForm.hidden = false; }
 function setAuthBusy(isBusy) { els.loginForm.querySelectorAll("button,input").forEach((el) => el.disabled = isBusy); els.verifyForm.querySelectorAll("button,input").forEach((el) => el.disabled = isBusy); }
-function logout() { auth = null; saveAuth(); state = normalizeState(createDefaultState()); saveState(); renderAuthState(); renderAll(); }
+function logout() { auth = null; saveAuth(); state = normalizeState(createDefaultState()); saveState(); resetAuthForms(); renderAuthState(); renderAll(); }
+
+function isBiometricSupported() {
+  return Boolean(window.PublicKeyCredential && navigator.credentials && window.isSecureContext);
+}
+function loadBiometric() {
+  try { return JSON.parse(localStorage.getItem(BIOMETRIC_KEY) || "null"); } catch { return null; }
+}
+function bytesToBase64Url(bytes) {
+  return btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+function base64UrlToBytes(value) {
+  const base64 = value.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - value.length % 4) % 4);
+  return Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+}
+function randomChallenge() {
+  return crypto.getRandomValues(new Uint8Array(32));
+}
+async function toggleBiometricLogin() {
+  if (!auth?.email || !auth?.token) return;
+  const saved = loadBiometric();
+  if (saved?.email === auth.email) {
+    localStorage.removeItem(BIOMETRIC_KEY);
+    renderAuthState();
+    notify("הכניסה הביומטרית בוטלה במכשיר הזה", "success");
+    return;
+  }
+  if (!isBiometricSupported()) {
+    notify("המכשיר הזה אינו תומך בטביעת אצבע או Face ID", "error");
+    return;
+  }
+  els.biometricSetupBtn.disabled = true;
+  try {
+    const userId = new TextEncoder().encode(auth.email).slice(0, 64);
+    const credential = await navigator.credentials.create({
+      publicKey: {
+        challenge: randomChallenge(),
+        rp: { name: "ניהול הוצאות קבלן" },
+        user: { id: userId, name: auth.email, displayName: auth.email },
+        pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "discouraged" },
+        timeout: 60000,
+        attestation: "none",
+      },
+    });
+    if (!credential) throw new Error("No credential");
+    localStorage.setItem(BIOMETRIC_KEY, JSON.stringify({
+      credentialId: bytesToBase64Url(credential.rawId),
+      email: auth.email,
+      token: auth.token,
+    }));
+    renderAuthState();
+    notify("הכניסה עם טביעת אצבע / Face ID הופעלה", "success");
+  } catch (error) {
+    if (error?.name !== "NotAllowedError") notify("לא הצלחתי להפעיל זיהוי ביומטרי במכשיר הזה", "error");
+  } finally {
+    els.biometricSetupBtn.disabled = false;
+  }
+}
+async function loginWithBiometrics() {
+  const saved = loadBiometric();
+  if (!saved || !isBiometricSupported()) return renderAuthState();
+  els.biometricLoginBtn.disabled = true;
+  try {
+    const assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge: randomChallenge(),
+        allowCredentials: [{ type: "public-key", id: base64UrlToBytes(saved.credentialId), transports: ["internal"] }],
+        userVerification: "required",
+        timeout: 60000,
+      },
+    });
+    if (!assertion) throw new Error("No assertion");
+    auth = { email: saved.email, token: saved.token };
+    saveAuth();
+    renderAuthState();
+    await syncFromServer();
+    notify("נכנסת בהצלחה", "success");
+  } catch (error) {
+    if (error?.name !== "NotAllowedError") notify("הזיהוי לא הצליח. אפשר להיכנס עם קוד למייל.", "error");
+  } finally {
+    els.biometricLoginBtn.disabled = false;
+  }
+}
 async function syncFromServer() { if (!auth?.token) return; try { const result = await apiPost({ action: "listUserData", token: auth.token }); state.projects = normalizeProjects(result.projects || []); state.expenses = normalizeExpenses(result.expenses || []); state.settings.summaryEmail = state.settings.summaryEmail || "5484916@gmail.com"; saveState(); renderAll(); } catch { notify("לא הצלחתי לסנכרן נתונים מהמייל", "error"); } }
 function normalizeProjects(projects) { const legacyDefaults = new Set(["פרויקט 1", "פרויקט 2", "פרויקט 3"]); return projects.filter((project) => !legacyDefaults.has(String(project.name || "").trim())).map((project, index) => ({ id: project.id || createId(), name: project.name || "פרויקט " + (index + 1), active: project.active !== false })); }
 function normalizeExpenses(expenses) { return expenses.map((expense) => ({ id: expense.id || createId(), projectId: expense.projectId || findProjectIdByName(expense.projectName), amount: Number(expense.amount || 0), item: expense.item || "", store: expense.store || "", category: expense.category || "כללי", date: expense.date || toDateInputValue(new Date()), note: expense.note || "", receipt: null, createdAt: expense.createdAt || new Date().toISOString() })); }
