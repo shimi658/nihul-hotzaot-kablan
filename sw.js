@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "contractor-expenses-v22";
+const CACHE_NAME = "contractor-expenses-v23";
 const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./app-icon.svg"];
 
 self.addEventListener("install", (event) => {
