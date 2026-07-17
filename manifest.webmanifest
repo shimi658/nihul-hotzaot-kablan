@@ -13,7 +13,7 @@
   "lang": "he",
   "icons": [
     {
-      "src": "app-icon.svg",
+      "src": "app-icon-premium.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
