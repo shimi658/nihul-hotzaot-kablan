@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="app-icon-premium.svg" />
     <title>ניהול הוצאות קבלן</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles-menu-v12.css" />
+    <link rel="stylesheet" href="styles-menu-v13.css" />
   </head>
   <body>
     <section class="install-prompt" id="installPrompt" hidden role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
@@ -94,12 +94,34 @@
           <span class="menu-avatar" aria-hidden="true">👤</span>
           <div><small>מחובר בתור</small><span class="user-email" id="userEmailBadge" hidden></span></div>
         </div>
-        <nav class="side-menu-links" aria-label="קטגוריות">
-          <button class="menu-link" type="button" data-view="expenseView"><span class="menu-link-icon purple">＋</span><span><strong>הוצאה חדשה</strong><small>רישום הוצאה מהיר</small></span><b>‹</b></button>
-          <button class="menu-link active" type="button" data-view="todayView"><span class="menu-link-icon green">₪</span><span><strong>סיכום הוצאות</strong><small>היום והחודש במבט אחד</small></span><b>‹</b></button>
-          <button class="menu-link" type="button" data-view="projectsView"><span class="menu-link-icon orange">▦</span><span><strong>פרויקטים</strong><small>ניהול אתרי העבודה</small></span><b>‹</b></button>
-          <button class="menu-link" type="button" data-view="reportsView"><span class="menu-link-icon blue">▤</span><span><strong>דוחות</strong><small>PDF, חודשי ושנתי</small></span><b>‹</b></button>
-          <button class="menu-link" type="button" data-view="settingsView"><span class="menu-link-icon pink">⚙</span><span><strong>הגדרות</strong><small>חשבון, מייל ואבטחה</small></span><b>‹</b></button>
+        <nav class="side-menu-links category-grid" aria-label="קטגוריות">
+          <p class="menu-section-label">ניהול העבודה</p>
+          <button class="menu-link category-card expense-category" type="button" data-view="expenseView">
+            <span class="menu-link-icon purple"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="9"/></svg></span>
+            <span class="category-copy"><strong>הוצאה חדשה</strong><small>רישום מהיר</small></span>
+            <span class="category-spark">מהיר</span>
+          </button>
+          <button class="menu-link category-card summary-category active" type="button" data-view="todayView">
+            <span class="menu-link-icon green"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18V9m6 9V5m6 13v-7m4 7H2"/></svg></span>
+            <span class="category-copy"><strong>סיכום</strong><small>החודש במבט</small></span>
+            <span class="category-badge" id="menuExpenseCount">0</span>
+          </button>
+          <button class="menu-link category-card projects-category" type="button" data-view="projectsView">
+            <span class="menu-link-icon orange"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5h18v10.5H3z"/><path d="M8 8.5V6h8v2.5M8 13h8"/></svg></span>
+            <span class="category-copy"><strong>פרויקטים</strong><small>אתרי העבודה</small></span>
+            <span class="category-badge" id="menuProjectCount">0</span>
+          </button>
+          <button class="menu-link category-card reports-category" type="button" data-view="reportsView">
+            <span class="menu-link-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9 13h7M9 17h7"/></svg></span>
+            <span class="category-copy"><strong>דוחות</strong><small>PDF וחיפוש</small></span>
+            <span class="category-spark blue-spark">חכם</span>
+          </button>
+          <p class="menu-section-label account-label">חשבון</p>
+          <button class="menu-link category-card settings-category wide-category" type="button" data-view="settingsView">
+            <span class="menu-link-icon pink"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.55V20.3h-3v-.09a1.7 1.7 0 0 0-1.04-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7 15a1.7 1.7 0 0 0-1.55-1.04H5.3v-3h.15A1.7 1.7 0 0 0 7 9.92a1.7 1.7 0 0 0-.34-1.88L6.6 7.98l2.12-2.12.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 11.7 4.7V4.6h3v.1a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1.04h.15v3h-.15A1.7 1.7 0 0 0 19.4 15z"/></svg></span>
+            <span class="category-copy"><strong>הגדרות ואבטחה</strong><small>חשבון, פרטיות וטביעת אצבע</small></span>
+            <span class="category-chevron">‹</span>
+          </button>
         </nav>
         <button class="menu-logout" id="logoutBtn" hidden type="button"><span>↪</span> התנתקות מהחשבון</button>
       </aside>
@@ -391,7 +413,7 @@
       <div class="empty-state">אין עדיין נתונים להצגה</div>
     </template>
 
-    <script src="app-menu-v17.js"></script>
+    <script src="app-menu-v18.js"></script>
   </body>
 </html>
 
