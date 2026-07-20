@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="app-icon-premium.svg" />
     <title>ניהול הוצאות קבלן</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles-menu-v11.css" />
+    <link rel="stylesheet" href="styles-menu-v12.css" />
   </head>
   <body>
     <section class="install-prompt" id="installPrompt" hidden role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
@@ -32,6 +32,7 @@
         <p class="eyebrow">כניסה מאובטחת</p>
         <h1>ניהול הוצאות קבלן</h1>
         <p class="hero-copy">הכנס מייל, קבל קוד חד־פעמי, וכל ההוצאות שלך יישמרו ויסתנכרנו בין מכשירים.</p>
+        <div class="auth-lock-message" id="authLockMessage" hidden><span aria-hidden="true">🔒</span><div><strong>האפליקציה ננעלה אוטומטית</strong><small>המידע הוסתר אחרי 5 דקות ללא שימוש. הטופס שמילאת נשמר.</small></div></div>
 
         <form id="loginForm" class="auth-form">
           <label>
@@ -316,6 +317,10 @@
                 <span class="security-card-icon" aria-hidden="true">☁</span>
                 <div><small>שמירת המידע</small><strong>Google Sheets</strong><span>הנתונים מופרדים לפי חשבון</span></div>
               </article>
+              <article class="security-status-card lock">
+                <span class="security-card-icon" aria-hidden="true">🔒</span>
+                <div><small>נעילה אוטומטית</small><strong>אחרי 5 דקות</strong><span>המידע מוסתר ללא מחיקת הטופס</span></div>
+              </article>
             </div>
           </section>
 
@@ -386,7 +391,7 @@
       <div class="empty-state">אין עדיין נתונים להצגה</div>
     </template>
 
-    <script src="app-menu-v16.js"></script>
+    <script src="app-menu-v17.js"></script>
   </body>
 </html>
 
