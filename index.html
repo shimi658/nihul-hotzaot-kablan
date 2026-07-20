@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="app-icon-premium.svg" />
     <title>ניהול הוצאות קבלן</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles-menu-v9.css" />
+    <link rel="stylesheet" href="styles-menu-v10.css" />
   </head>
   <body>
     <section class="install-prompt" id="installPrompt" hidden role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
@@ -266,52 +266,70 @@
         </section>
 
         <section class="view" id="settingsView">
-          <section class="panel account-panel">
-            <div class="account-copy">
-              <span class="account-icon" aria-hidden="true">👤</span>
+          <section class="panel security-center">
+            <div class="security-hero">
+              <div class="security-shield" aria-hidden="true">✓</div>
               <div>
-                <p class="section-kicker">החשבון שלי</p>
-                <h2>חיבור וכניסה</h2>
-                <p class="hint account-hint">כאן אפשר לראות מי מחובר או לצאת מהמערכת.</p>
-                <div class="settings-account-identity">
-                  <span class="settings-online-dot" aria-hidden="true"></span>
-                  <div>
-                    <small>חשבון מחובר</small>
-                    <strong id="settingsAccountEmail">—</strong>
-                    <span id="settingsSecurityStatus">מחובר ומסונכרן באופן מאובטח</span>
-                  </div>
-                </div>
+                <p class="section-kicker">מרכז אבטחה ופרטיות</p>
+                <h2>החשבון שלך מוגן</h2>
+                <p id="settingsSecurityStatus">מחובר ומסונכרן באופן מאובטח</p>
               </div>
+              <span class="security-grade">מוגן</span>
             </div>
-            <div class="account-actions" id="accountActions">
-              <button class="secondary" id="revokeOtherSessionsBtn" type="button">נתק את כל המכשירים האחרים</button>
-              <button class="secondary logout-button settings-logout" id="settingsLogoutBtn" type="button">התנתקות מהחשבון</button>
+
+            <div class="security-status-grid">
+              <article class="security-status-card account">
+                <span class="security-card-icon" aria-hidden="true">👤</span>
+                <div><small>חשבון מחובר</small><strong id="settingsAccountEmail">—</strong><span><i></i> מחובר עכשיו</span></div>
+              </article>
+              <article class="security-status-card time">
+                <span class="security-card-icon" aria-hidden="true">◷</span>
+                <div><small>כניסה אחרונה</small><strong id="settingsLastLogin">החיבור הנוכחי</strong><span>מוצג לפי המכשיר</span></div>
+              </article>
+              <article class="security-status-card biometric">
+                <span class="security-card-icon" aria-hidden="true">☝</span>
+                <div><small>טביעת אצבע / Face ID</small><strong id="settingsBiometricState">כבויה</strong><span>הזיהוי נשמר רק במכשיר</span></div>
+              </article>
+              <article class="security-status-card storage">
+                <span class="security-card-icon" aria-hidden="true">☁</span>
+                <div><small>שמירת המידע</small><strong>Google Sheets</strong><span>הנתונים מופרדים לפי חשבון</span></div>
+              </article>
             </div>
           </section>
-          <section class="panel account-panel">
-            <div class="account-copy">
-              <span class="account-icon biometric-shield" aria-hidden="true">🛡️</span>
-              <div>
-                <p class="section-kicker">פרטיות ושליטה</p>
-                <h2>המידע שלך</h2>
-                <p class="hint account-hint">אפשר להוריד עותק מלא או למחוק לצמיתות רק את החשבון והמידע שלך.</p>
-              </div>
-            </div>
-            <div class="account-actions">
-              <button class="secondary" id="exportAccountDataBtn" type="button">ייצוא כל המידע שלי</button>
-              <button class="secondary logout-button" id="deleteAccountBtn" type="button">מחיקת החשבון והמידע</button>
-            </div>
-          </section>
-          <section class="panel biometric-panel">
-            <div class="account-copy">
-              <span class="account-icon biometric-shield" aria-hidden="true">☝</span>
-              <div>
-                <p class="section-kicker">אבטחה מהירה</p>
-                <h2>טביעת אצבע או Face ID</h2>
-                <p class="hint account-hint" id="biometricStatus">הפעל Passkey מוצפן כדי לדרוש טביעת אצבע או Face ID בכל פתיחה.</p>
-              </div>
+
+          <section class="panel security-action-panel biometric-panel">
+            <div class="security-action-copy">
+              <span class="action-color-icon purple" aria-hidden="true">☝</span>
+              <div><h3>נעילה ביומטרית</h3><p id="biometricStatus">הפעל Passkey מוצפן כדי לדרוש טביעת אצבע או Face ID בכל פתיחה.</p></div>
             </div>
             <button class="primary biometric-settings-button" id="biometricSetupBtn" type="button">הפעל כניסה ביומטרית</button>
+          </section>
+
+          <section class="panel security-action-panel">
+            <div class="security-action-copy">
+              <span class="action-color-icon blue" aria-hidden="true">▣</span>
+              <div><h3>מכשירים מחוברים</h3><p>נתק טלפונים ומחשבים אחרים. המכשיר הזה יישאר מחובר.</p></div>
+            </div>
+            <button class="secondary" id="revokeOtherSessionsBtn" type="button">נתק מכשירים אחרים</button>
+          </section>
+
+          <section class="panel security-action-panel">
+            <div class="security-action-copy">
+              <span class="action-color-icon green" aria-hidden="true">⇩</span>
+              <div><h3>המידע האישי שלך</h3><p>אפשר להוריד גיבוי מלא של הפרויקטים וההוצאות בכל רגע.</p></div>
+            </div>
+            <div class="security-inline-actions">
+              <button class="secondary" id="exportAccountDataBtn" type="button">הורד את המידע שלי</button>
+              <button class="secondary logout-button" id="deleteAccountBtn" type="button">מחיקת החשבון</button>
+            </div>
+          </section>
+
+          <section class="panel security-action-panel signout-panel">
+            <div class="security-action-copy">
+              <span class="action-color-icon orange" aria-hidden="true">↪</span>
+              <div><h3>סיום עבודה</h3><p>התנתקות מאובטחת מהמכשיר הנוכחי בלבד.</p></div>
+            </div>
+            <button class="secondary logout-button settings-logout" id="settingsLogoutBtn" type="button">התנתקות מהחשבון</button>
           </section>
           <section class="panel">
             <div class="section-title">
@@ -346,7 +364,7 @@
       <div class="empty-state">אין עדיין נתונים להצגה</div>
     </template>
 
-    <script src="app-menu-v14.js"></script>
+    <script src="app-menu-v15.js"></script>
   </body>
 </html>
 
