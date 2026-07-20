@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="app-icon-premium.svg" />
     <title>ניהול הוצאות קבלן</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles-menu-v10.css" />
+    <link rel="stylesheet" href="styles-menu-v11.css" />
   </head>
   <body>
     <section class="install-prompt" id="installPrompt" hidden role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
@@ -263,6 +263,28 @@
             </div>
             <div id="reportSummary" class="report-summary"></div>
           </section>
+          <section class="panel expense-search-panel">
+            <div class="section-title">
+              <div><p class="section-kicker">איתור מהיר</p><h2>חיפוש הוצאות</h2></div>
+              <span class="search-count" id="searchResultCount">0 הוצאות נמצאו</span>
+            </div>
+            <div class="expense-search-grid">
+              <label class="search-main">חיפוש חופשי
+                <input id="expenseSearch" type="search" placeholder="פריט, ספק, קטגוריה, פרויקט או סכום" />
+              </label>
+              <label>פרויקט
+                <select id="searchProject"><option value="">כל הפרויקטים</option></select>
+              </label>
+              <label>מתאריך
+                <input id="searchFrom" type="date" />
+              </label>
+              <label>עד תאריך
+                <input id="searchTo" type="date" />
+              </label>
+              <button class="secondary clear-search" id="clearSearchBtn" type="button">נקה חיפוש</button>
+            </div>
+            <div class="search-results" id="searchResults"></div>
+          </section>
         </section>
 
         <section class="view" id="settingsView">
@@ -364,7 +386,7 @@
       <div class="empty-state">אין עדיין נתונים להצגה</div>
     </template>
 
-    <script src="app-menu-v15.js"></script>
+    <script src="app-menu-v16.js"></script>
   </body>
 </html>
 
