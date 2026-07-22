@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" href="app-icon-premium.svg" />
     <title>ניהול הוצאות קבלן</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles-menu-v15.css" />
+    <link rel="stylesheet" href="styles-menu-v14.css" />
   </head>
   <body>
     <section class="install-prompt" id="installPrompt" hidden role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
@@ -201,34 +201,53 @@
         </section>
 
         <section class="view active" id="todayView">
-          <section class="premium-home-hero">
-            <div class="premium-hero-glow"></div>
-            <div class="premium-hero-top"><span>הוצאות החודש</span><span class="premium-live"><i></i> מעודכן</span></div>
-            <strong id="homeMonthTotal">₪0</strong>
-            <div class="premium-hero-bottom"><span id="homeTrend">7 הימים האחרונים</span><small>ניהול חכם בזמן אמת</small></div>
+          <section class="home-grid dashboard-summary" aria-label="סיכום מהיר">
+            <article class="home-card home-card-main">
+              <span>היום</span>
+              <strong id="homeTodayTotal">₪0</strong>
+              <small id="homeTodayCount">0 הוצאות</small>
+            </article>
+            <article class="home-card">
+              <span>החודש</span>
+              <strong id="homeMonthTotal">₪0</strong>
+              <small>סיכום שוטף</small>
+            </article>
+            <article class="home-card">
+              <span>פרויקטים</span>
+              <strong id="homeActiveProjects">0</strong>
+              <small>פעילים</small>
+            </article>
           </section>
 
-          <section class="premium-stat-grid" aria-label="סיכום מהיר">
-            <article class="premium-stat violet"><span class="premium-stat-icon">₪</span><div><small>היום</small><strong id="homeTodayTotal">₪0</strong><em id="homeTodayCount">0 הוצאות</em></div></article>
-            <article class="premium-stat cyan"><span class="premium-stat-icon">▦</span><div><small>פרויקטים פעילים</small><strong id="homeActiveProjects">0</strong><em>בניהול שוטף</em></div></article>
-            <article class="premium-stat gold"><span class="premium-stat-icon">Ø</span><div><small>ממוצע להוצאה</small><strong id="homeAverage">₪0</strong><em>בחודש הנוכחי</em></div></article>
-          </section>
-
-          <section class="panel premium-chart-panel">
-            <div class="premium-panel-title"><div><p class="section-kicker">מגמה שבועית</p><h2>הוצאות ב־7 ימים</h2></div><span class="chart-legend"><i></i> הוצאה יומית</span></div>
-            <div class="premium-chart-wrap">
-              <svg id="homeChart" class="premium-chart" viewBox="0 0 620 170" role="img" aria-label="גרף הוצאות בשבעת הימים האחרונים"></svg>
-              <p class="chart-empty" id="homeChartEmpty" hidden>הגרף יתמלא לאחר רישום הוצאות</p>
+          <section class="dashboard-visual" aria-label="ניהול חכם של עבודות הבנייה">
+            <div class="dashboard-visual-copy">
+              <span class="dashboard-visual-badge">הכול במקום אחד</span>
+              <h2>עובדים מסודר.<br />נשארים בשליטה.</h2>
+              <p>ההוצאות, הפרויקטים והדוחות שלך מחכים בתוך התפריט.</p>
             </div>
           </section>
 
-          <section class="premium-insights">
-            <article><span class="insight-icon project">◆</span><div><small>הפרויקט המוביל</small><strong id="homeTopProject">אין עדיין נתונים</strong></div></article>
-            <article><span class="insight-icon category">●</span><div><small>הקטגוריה המובילה</small><strong id="homeTopCategory">אין עדיין נתונים</strong></div></article>
+          <section class="summary-grid">
+            <article class="metric metric-total">
+              <span>הוצאות היום</span>
+              <strong id="todayTotal">₪0</strong>
+            </article>
+            <article class="metric">
+              <span>מספר הוצאות</span>
+              <strong id="todayCount">0</strong>
+            </article>
           </section>
 
-          <span id="todayTotal" hidden>₪0</span><span id="todayCount" hidden>0</span><div id="todayList" hidden></div>
-          <button class="premium-quick-add" id="quickAddExpenseBtn" type="button" aria-label="הוספת הוצאה חדשה"><span>＋</span><strong>הוצאה חדשה</strong></button>
+          <section class="panel daily-journal-panel" hidden>
+            <div class="section-title compact-title">
+              <div>
+                <p class="section-kicker">יומן יומי</p>
+                <h2>פירוט היום</h2>
+              </div>
+              <button class="secondary" id="emailTodayBtn" type="button">שלח דוח PDF</button>
+            </div>
+            <div id="todayList" class="expense-list"></div>
+          </section>
         </section>
 
         <section class="view" id="projectsView">
@@ -394,7 +413,7 @@
       <div class="empty-state">אין עדיין נתונים להצגה</div>
     </template>
 
-    <script src="app-menu-v20.js"></script>
+    <script src="app-menu-v18.js"></script>
   </body>
 </html>
 
